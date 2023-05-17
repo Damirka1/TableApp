@@ -24,12 +24,11 @@ public class MapListService {
 
     public MapListService(android.content.Context context, ListView list, MainActivity mainActivity) {
         this.list = list;
-        mapList = List.of("Казахстанская", "Тест");
+        mapList = List.of("Казахстанская", "Тест1", "Тест2", "Тест3", "Тест4", "Тест5");
         adapter = new ArrayAdapter<>(context, R.layout.map_list_element, mapList);
         list.setAdapter(adapter);
         list.setOnItemClickListener((adapterView, view, i, l) -> {
             TextView textView = (TextView) view;
-//            Toast.makeText(context, textView.getText(), Toast.LENGTH_SHORT).show();
 
             Intent myIntent = new Intent(mainActivity, MapActivity.class);
 

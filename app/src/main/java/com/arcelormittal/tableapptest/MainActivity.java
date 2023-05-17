@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
             setTabView(v);
         });
 
+        generalBtn.performClick();
+
         mapsBtn.setOnClickListener(view -> {
             View v = vi.inflate(R.layout.maps_list, null);
 

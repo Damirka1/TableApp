@@ -13,7 +13,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="0dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="100dp"
         android:layout_marginEnd="0dp"
         android:text="Список шахт"
         android:textAlignment="center"
