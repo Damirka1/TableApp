@@ -15,6 +15,18 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import com.google.android.material.textfield.TextInputLayout;
+
+
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.arcelormittal.tableapptest.services.MapListService;
 import com.arcelormittal.tableapptest.services.PositionsListService;
 
@@ -40,6 +52,8 @@ public class MapActivity extends AppCompatActivity {
 
     // Services
     private PositionsListService positionsListService;
+    private ArrayAdapter<String> adapter;
+
 
     private int convertPxToDp(int dps) {
         final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
@@ -159,6 +173,66 @@ public class MapActivity extends AppCompatActivity {
             }
 
         });
+
+        Button backButton = findViewById(R.id.BackButton);
+        backButton.setOnClickListener(view -> {
+            onBackPressed();
+        });
+
+
+
+        TextInputLayout searchInputLayout = findViewById(R.id.search_text_input);
+        EditText searchEditText = searchInputLayout.getEditText();
+
+
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, positionsListService.getMapList());
+        list.setAdapter(adapter);
+
+        // Установка слушателя изменений текста в EditText
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Ничего не делаем перед изменением текста
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Вызываем метод для фильтрации списка на основе введенного текста
+                filterList(charSequence.toString());
+            }
+
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // Ничего не делаем после изменения текста
+            }
+        });
+
+        filterList(""); // Фильтрация списка с пустой строкой или передайте нужное вам значение для фильтрации
+    }
+
+    private void filterList(String searchText) {
+        // Создаем новый адаптер
+        ArrayAdapter<String> newAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+
+        List<String> mapList = positionsListService.getMapList();
+        List<String> filteredList = new ArrayList<>(); // Отфильтрованный список
+
+        // Проходим по каждому элементу в mapList
+        for (String map : mapList) {
+            // Если значение содержит введенный текст (игнорируя регистр), добавляем его в отфильтрованный список
+            if (map.toLowerCase().contains(searchText.toLowerCase())) {
+                filteredList.add(map);
+            }
+        }
+
+        // Добавляем все элементы в новый адаптер
+        newAdapter.addAll(filteredList);
+
+        // Устанавливаем новый адаптер в ListView
+        ListView list = findViewById(R.id.PositionList);
+        list.setAdapter(newAdapter);
     }
 
 }
+

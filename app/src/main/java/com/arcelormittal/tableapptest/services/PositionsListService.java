@@ -20,6 +20,9 @@ import java.util.List;
 public class PositionsListService {
     private List<String> mapList;
     private ArrayAdapter<String> adapter;
+
+    private ArrayList<String> originalList;
+
     private ListView list;
 
     private String mapPath;
@@ -51,7 +54,6 @@ public class PositionsListService {
         this.mapPath = path;
         mapList = new LinkedList<>();
         listAssetFiles(path, context.getAssets());
-
         adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mapList);
         list.setAdapter(adapter);
 
@@ -65,6 +67,14 @@ public class PositionsListService {
             myIntent.putExtra("value", path + textView.getText() + ".pdf");
 
             mapActivity.startActivity(myIntent);
+
+            // Создание копии исходного списка
+            originalList = new ArrayList<>(mapList);
+
         });
+
+    }
+    public List<String> getMapList() {
+        return mapList;
     }
 }
