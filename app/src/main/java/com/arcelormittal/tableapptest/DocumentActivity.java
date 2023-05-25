@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.github.barteksc.pdfviewer.PDFView;
-import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 
 public class DocumentActivity extends AppCompatActivity {
 

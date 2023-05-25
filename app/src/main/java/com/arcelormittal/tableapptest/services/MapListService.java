@@ -1,6 +1,7 @@
 package com.arcelormittal.tableapptest.services;
 
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,17 +15,39 @@ import com.arcelormittal.tableapptest.R;
 
 import org.w3c.dom.Text;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MapListService {
     private List<String> mapList;
     private ArrayAdapter<String> adapter;
-
     private ListView list;
+    private android.content.Context context;
+
+    private boolean listShafts(String path, AssetManager assets) {
+        String [] list;
+        try {
+            list = assets.list(path);
+            if (list.length > 0) {
+                // This is a folders
+                Collections.addAll(mapList, list);
+            }
+        } catch (IOException e) {
+            return false;
+        }
+
+        mapList.removeAll(List.of("images", "webkit"));
+
+        return true;
+    }
 
     public MapListService(android.content.Context context, ListView list, MainActivity mainActivity) {
+        this.context = context;
         this.list = list;
-        mapList = List.of("Казахстанская", "Тест1", "Тест2", "Тест3", "Тест4", "Тест5");
+        mapList = new LinkedList<>();
+        listShafts("", context.getAssets());
         adapter = new ArrayAdapter<>(context, R.layout.map_list_element, mapList);
         list.setAdapter(adapter);
         list.setOnItemClickListener((adapterView, view, i, l) -> {

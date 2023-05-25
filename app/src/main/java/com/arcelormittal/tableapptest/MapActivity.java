@@ -1,37 +1,29 @@
 package com.arcelormittal.tableapptest;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ListView;
-
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import com.google.android.material.textfield.TextInputLayout;
-
-
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import android.widget.ListView;
 
-import com.arcelormittal.tableapptest.services.MapListService;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.arcelormittal.tableapptest.services.PositionsListService;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import ovh.plrapps.mapview.MapView;
 import ovh.plrapps.mapview.MapViewConfiguration;
@@ -179,60 +171,36 @@ public class MapActivity extends AppCompatActivity {
             onBackPressed();
         });
 
-
-
         TextInputLayout searchInputLayout = findViewById(R.id.search_text_input);
         EditText searchEditText = searchInputLayout.getEditText();
-
 
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, positionsListService.getMapList());
         list.setAdapter(adapter);
 
-        // Установка слушателя изменений текста в EditText
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // Ничего не делаем перед изменением текста
-            }
+        if (searchEditText != null) {
+            searchEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    // Ничего не делаем перед изменением текста
+                }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // Вызываем метод для фильтрации списка на основе введенного текста
-                filterList(charSequence.toString());
-            }
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    // Вызываем метод для фильтрации списка на основе введенного текста
+                    positionsListService.filterList(charSequence.toString());
+                }
 
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                // Ничего не делаем после изменения текста
-            }
-        });
-
-        filterList(""); // Фильтрация списка с пустой строкой или передайте нужное вам значение для фильтрации
-    }
-
-    private void filterList(String searchText) {
-        // Создаем новый адаптер
-        ArrayAdapter<String> newAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-
-        List<String> mapList = positionsListService.getMapList();
-        List<String> filteredList = new ArrayList<>(); // Отфильтрованный список
-
-        // Проходим по каждому элементу в mapList
-        for (String map : mapList) {
-            // Если значение содержит введенный текст (игнорируя регистр), добавляем его в отфильтрованный список
-            if (map.toLowerCase().contains(searchText.toLowerCase())) {
-                filteredList.add(map);
-            }
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    // Ничего не делаем после изменения текста
+                }
+            });
         }
 
-        // Добавляем все элементы в новый адаптер
-        newAdapter.addAll(filteredList);
-
-        // Устанавливаем новый адаптер в ListView
-        ListView list = findViewById(R.id.PositionList);
-        list.setAdapter(newAdapter);
+        positionsListService.filterList("");
     }
+
+
 
 }
 

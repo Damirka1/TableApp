@@ -21,11 +21,11 @@ public class PositionsListService {
     private List<String> mapList;
     private ArrayAdapter<String> adapter;
 
-    private ArrayList<String> originalList;
-
     private ListView list;
 
     private String mapPath;
+
+    private android.content.Context context;
 
     private boolean listAssetFiles(String path, AssetManager assets) {
         String [] list;
@@ -50,6 +50,7 @@ public class PositionsListService {
     }
 
     public PositionsListService(String path, android.content.Context context, ListView list, MapActivity mapActivity) {
+        this.context = context;
         this.list = list;
         this.mapPath = path;
         mapList = new LinkedList<>();
@@ -68,13 +69,27 @@ public class PositionsListService {
 
             mapActivity.startActivity(myIntent);
 
-            // Создание копии исходного списка
-            originalList = new ArrayList<>(mapList);
-
         });
 
     }
     public List<String> getMapList() {
         return mapList;
+    }
+
+    public void filterList(String searchText) {
+        ArrayAdapter<String> newAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1);
+
+        List<String> mapList = getMapList();
+        List<String> filteredList = new ArrayList<>();
+
+        for (String map : mapList) {
+            if (map.toLowerCase().contains(searchText.toLowerCase())) {
+                filteredList.add(map);
+            }
+        }
+
+        newAdapter.addAll(filteredList);
+
+        list.setAdapter(newAdapter);
     }
 }
