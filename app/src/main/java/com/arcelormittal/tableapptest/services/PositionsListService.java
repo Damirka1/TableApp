@@ -2,30 +2,64 @@ package com.arcelormittal.tableapptest.services;
 
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arcelormittal.tableapptest.DocumentActivity;
-import com.arcelormittal.tableapptest.MainActivity;
 import com.arcelormittal.tableapptest.MapActivity;
 import com.arcelormittal.tableapptest.R;
+import com.arcelormittal.tableapptest.entities.Point;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class PositionsListService {
-    private List<String> mapList;
-    private ArrayAdapter<String> adapter;
+    private final List<String> mapList;
+    private final List<Point> points;
+    private final ArrayAdapter<String> adapter;
 
-    private ListView list;
+    private final ListView posList;
 
-    private String mapPath;
+    private final ListView searchList;
 
-    private android.content.Context context;
+    private final String mapDocPath;
+
+    private final android.content.Context context;
+
+    private final MapActivity mapActivity;
+
+    private List<Point> loadPoints(String path, AssetManager assets) {
+        List<Point> pointList = new LinkedList<>();
+
+        BufferedReader reader;
+
+        try {
+            reader = new BufferedReader(new InputStreamReader(assets.open(path)));
+            String line = reader.readLine();
+
+            while (line != null) {
+                String[] res = line.split(" ");
+
+                Point point = new Point(Integer.parseInt(res[0]), Integer.parseInt(res[1]), Integer.parseInt(res[2]), res[3].toLowerCase());
+                pointList.add(point);
+
+                // read next line
+                line = reader.readLine();
+            }
+
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return pointList;
+    }
 
     private boolean listAssetFiles(String path, AssetManager assets) {
         String [] list;
@@ -49,28 +83,40 @@ public class PositionsListService {
         return true;
     }
 
-    public PositionsListService(String path, android.content.Context context, ListView list, MapActivity mapActivity) {
-        this.context = context;
-        this.list = list;
-        this.mapPath = path;
-        mapList = new LinkedList<>();
-        listAssetFiles(path, context.getAssets());
-        adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mapList);
-        list.setAdapter(adapter);
+    public void openFile(String file) {
+        Intent myIntent = new Intent(mapActivity, DocumentActivity.class);
 
-        list.setOnItemClickListener((adapterView, view, i, l) -> {
+        myIntent.putExtra("value", mapDocPath + file + ".pdf");
+
+        mapActivity.startActivity(myIntent);
+    }
+
+    public PositionsListService(String path, android.content.Context context, ListView posList, ListView searchList, MapActivity mapActivity) {
+        this.context = context;
+        this.mapActivity = mapActivity;
+
+        this.posList = posList;
+        this.searchList = searchList;
+
+        this.mapDocPath = path + "/Документы/";
+        mapList = new LinkedList<>();
+        listAssetFiles(mapDocPath, context.getAssets());
+
+        this.points = loadPoints(path + "/Точки.txt", context.getAssets());
+
+        adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mapList);
+        posList.setAdapter(adapter);
+
+        AdapterView.OnItemClickListener listener = (adapterView, view, i, l) -> {
             TextView textView = (TextView) view;
 
             Toast.makeText(context, textView.getText(), Toast.LENGTH_SHORT).show();
 
-            Intent myIntent = new Intent(mapActivity, DocumentActivity.class);
+            openFile(textView.getText().toString());
+        };
 
-            myIntent.putExtra("value", path + textView.getText() + ".pdf");
-
-            mapActivity.startActivity(myIntent);
-
-        });
-
+        posList.setOnItemClickListener(listener);
+        searchList.setOnItemClickListener(listener);
     }
     public List<String> getMapList() {
         return mapList;
@@ -78,7 +124,7 @@ public class PositionsListService {
 
     public void filterList(String searchText) {
         ArrayAdapter<String> newAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1);
-
+        ArrayAdapter<String> newSearchAdapter = new ArrayAdapter<>(context, R.layout.map_list_element);
         List<String> mapList = getMapList();
         List<String> filteredList = new ArrayList<>();
 
@@ -89,7 +135,13 @@ public class PositionsListService {
         }
 
         newAdapter.addAll(filteredList);
+        newSearchAdapter.addAll(filteredList);
 
-        list.setAdapter(newAdapter);
+        posList.setAdapter(newAdapter);
+        searchList.setAdapter(newSearchAdapter);
+    }
+
+    public List<Point> getPoints() {
+        return points;
     }
 }

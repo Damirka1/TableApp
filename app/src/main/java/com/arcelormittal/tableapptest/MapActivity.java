@@ -3,37 +3,44 @@ package com.arcelormittal.tableapptest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.arcelormittal.tableapptest.entities.Point;
 import com.arcelormittal.tableapptest.services.PositionsListService;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import ovh.plrapps.mapview.MapView;
 import ovh.plrapps.mapview.MapViewConfiguration;
 import ovh.plrapps.mapview.core.TileStreamProvider;
+import ovh.plrapps.mapview.markers.MarkerLayout;
 
 public class MapActivity extends AppCompatActivity {
 
     private ConstraintLayout mapLayout;
     private ConstraintLayout findLayout;
     private ConstraintLayout menuLayout;
+
+    private ConstraintLayout searchLayout;
 
     private int menuWidth = 0;
 
@@ -44,10 +51,9 @@ public class MapActivity extends AppCompatActivity {
 
     // Services
     private PositionsListService positionsListService;
-    private ArrayAdapter<String> adapter;
 
 
-    private int convertPxToDp(int dps) {
+    private int convertDpToPx(int dps) {
         final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
         int pixels = (int) (dps * scale + 0.5f);
         return pixels;
@@ -56,7 +62,7 @@ public class MapActivity extends AppCompatActivity {
     private void showMenu() {
         menuLayout.setVisibility(View.VISIBLE);
 
-        ValueAnimator anim = ValueAnimator.ofInt(convertPxToDp(1), convertPxToDp(300));
+        ValueAnimator anim = ValueAnimator.ofInt(convertDpToPx(1), convertDpToPx(300));
         anim.addUpdateListener(valueAnimator -> {
             int val = (Integer) valueAnimator.getAnimatedValue();
             ViewGroup.LayoutParams layoutParams = menuLayout.getLayoutParams();
@@ -94,7 +100,7 @@ public class MapActivity extends AppCompatActivity {
             child.setVisibility(View.GONE);
         }
 
-        ValueAnimator anim = ValueAnimator.ofInt(convertPxToDp(300), convertPxToDp(1));
+        ValueAnimator anim = ValueAnimator.ofInt(convertDpToPx(300), convertDpToPx(1));
         anim.addUpdateListener(valueAnimator -> {
             int val = (Integer) valueAnimator.getAnimatedValue();
             ViewGroup.LayoutParams layoutParams = menuLayout.getLayoutParams();
@@ -114,6 +120,57 @@ public class MapActivity extends AppCompatActivity {
         anim.start();
     }
 
+    private void hideSearchMenu() {
+        searchLayout.setVisibility(View.GONE);
+    }
+
+    private void showSearchMenu() {
+        searchLayout.setVisibility(View.VISIBLE);
+    }
+
+    private List<View> markers = new LinkedList<>();
+
+    private void setMarkers(MapView map) {
+        MarkerLayout markerLayout = map.getMarkerLayout();
+
+        LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        for(Point point : positionsListService.getPoints()) {
+            View v = vi.inflate(R.layout.marker, null);
+
+            ((TextView)v.findViewById(R.id.MarkerTest)).setText(point.getText());
+            markers.add(v);
+
+            markerLayout.addMarker(v, point.getX(), point.getY(),
+                    0f, 0f, 0f, 0f, point.getText());
+
+            v.setOnClickListener(view -> {
+                String position = ((TextView)v.findViewById(R.id.MarkerTest)).getText().toString();
+                String positionWithoutLetters = position.replaceAll("([а-я])", "");
+
+                if(Integer.parseInt(positionWithoutLetters) < 100)
+                    position = "0" + position;
+
+                try {
+                    positionsListService.openFile(position);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    Toast.makeText(this, "Can't find file", Toast.LENGTH_SHORT).show();
+                }
+
+            });
+        }
+
+        map.addReferentialListener(referentialData -> {
+            int x = convertDpToPx(-10);
+            int y = convertDpToPx(120);
+            for(View marker : markers) {
+                marker.setTranslationX(x * referentialData.getScale());
+                marker.setTranslationY(y * referentialData.getScale());
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,15 +180,18 @@ public class MapActivity extends AppCompatActivity {
         mapLayout = findViewById(R.id.MapLayout);
         findLayout = findViewById(R.id.FindLayout);
         menuLayout = findViewById(R.id.MenuLayout);
+        searchLayout = findViewById(R.id.SearchLayout);
 
         hideMenuStart();
+        hideSearchMenu();
 
         Intent intent = getIntent();
         String shaft = intent.getStringExtra("value");
 
-        ListView list = findViewById(R.id.PositionList);
+        ListView posList = findViewById(R.id.PositionList);
+        ListView searchList = findViewById(R.id.SearchPositionList);
 
-        positionsListService = new PositionsListService(shaft + "/Документы/", getApplicationContext(), list, this);
+        positionsListService = new PositionsListService(shaft, getApplicationContext(), posList, searchList, this);
 
         MapView map = new MapView(getApplicationContext());
 
@@ -140,7 +200,7 @@ public class MapActivity extends AppCompatActivity {
             try {
                 stream = getResources().getAssets().open(shaft + "/Карта/IMG-" + ((row * (fullSize / tileSize)) + col) + ".jpg");
             } catch (IOException e) {
-                System.out.println("Can't find file:" + e.getMessage());
+//                System.out.println("Can't find file:" + e.getMessage());
                 return null;
             }
             return stream;
@@ -153,6 +213,8 @@ public class MapActivity extends AppCompatActivity {
         map.configure(config);
 
         mapLayout.addView(map);
+
+        setMarkers(map);
 
         menuButton = findViewById(R.id.MenuButton);
 
@@ -174,9 +236,6 @@ public class MapActivity extends AppCompatActivity {
         TextInputLayout searchInputLayout = findViewById(R.id.search_text_input);
         EditText searchEditText = searchInputLayout.getEditText();
 
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, positionsListService.getMapList());
-        list.setAdapter(adapter);
-
         if (searchEditText != null) {
             searchEditText.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -187,6 +246,12 @@ public class MapActivity extends AppCompatActivity {
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     // Вызываем метод для фильтрации списка на основе введенного текста
+
+                    if(charSequence.length() > 0)
+                        showSearchMenu();
+                    else
+                        hideSearchMenu();
+
                     positionsListService.filterList(charSequence.toString());
                 }
 
