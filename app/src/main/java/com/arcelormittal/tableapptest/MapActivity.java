@@ -128,8 +128,6 @@ public class MapActivity extends AppCompatActivity {
         searchLayout.setVisibility(View.VISIBLE);
     }
 
-    private List<View> markers = new LinkedList<>();
-
     private void setMarkers(MapView map) {
         MarkerLayout markerLayout = map.getMarkerLayout();
 
@@ -139,7 +137,6 @@ public class MapActivity extends AppCompatActivity {
             View v = vi.inflate(R.layout.marker, null);
 
             ((TextView)v.findViewById(R.id.MarkerTest)).setText(point.getText());
-            markers.add(v);
 
             markerLayout.addMarker(v, point.getX(), point.getY(),
                     0f, 0f, 0f, 0f, point.getText());
@@ -157,18 +154,9 @@ public class MapActivity extends AppCompatActivity {
                     System.out.println(e.getMessage());
                     Toast.makeText(this, "Can't find file", Toast.LENGTH_SHORT).show();
                 }
-
             });
         }
 
-        map.addReferentialListener(referentialData -> {
-            int x = convertDpToPx(-10);
-            int y = convertDpToPx(120);
-            for(View marker : markers) {
-                marker.setTranslationX(x * referentialData.getScale());
-                marker.setTranslationY(y * referentialData.getScale());
-            }
-        });
     }
 
     @Override
