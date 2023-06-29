@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.arcelormittal.tableapptest.services.JdbcService;
 import com.arcelormittal.tableapptest.services.MapListService;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Services
     private MapListService mapListService;
+    private JdbcService jdbcService;
 
     private void setTabView(View v) {
         viewLayout.removeAllViews();
@@ -37,6 +39,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Thread t = new Thread(() -> jdbcService = new JdbcService());
+
+        t.start();
 
         vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
