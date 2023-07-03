@@ -30,7 +30,7 @@ public class PositionsListService {
 
     private final ListView searchList;
 
-    private final String mapDocPath;
+//    private final String mapDocPath;
 
     private final android.content.Context context;
 
@@ -41,32 +41,33 @@ public class PositionsListService {
         points = ld.getPointsByShaft(shaftId);
     }
 
-    private boolean listAssetFiles(String path, AssetManager assets) {
-        String [] list;
-        try {
-            list = assets.list(path);
-            if (list.length > 0) {
-                // This is a folder
-                for (String file : list) {
-                    if (!listAssetFiles(path + "/" + file, assets))
-                        return false;
-                    else {
-                        // This is a file
-                        mapList.add(file.substring(0, file.indexOf('.')));
-                    }
-                }
-            }
-        } catch (IOException e) {
-            return false;
-        }
-
-        return true;
-    }
+//    private boolean listAssetFiles(String path, AssetManager assets) {
+//        String [] list;
+//        try {
+//            list = assets.list(path);
+//            if (list.length > 0) {
+//                // This is a folder
+//                for (String file : list) {
+//                    if (!listAssetFiles(path + "/" + file, assets))
+//                        return false;
+//                    else {
+//                        // This is a file
+//                        mapList.add(file.substring(0, file.indexOf('.')));
+//                    }
+//                }
+//            }
+//        } catch (IOException e) {
+//            return false;
+//        }
+//
+//        return true;
+//    }
 
     public void openFile(String file) {
         Intent myIntent = new Intent(mapActivity, DocumentActivity.class);
 
-        myIntent.putExtra("value", mapDocPath + file + ".pdf");
+        myIntent.putExtra("value", file);
+        myIntent.putExtra("id", shaftId);
 
         mapActivity.startActivity(myIntent);
     }
@@ -81,9 +82,9 @@ public class PositionsListService {
         this.posList = posList;
         this.searchList = searchList;
 
-        this.mapDocPath = path + "/Документы/";
+//        this.mapDocPath = path + "/Документы/";
         mapList = new LinkedList<>();
-        listAssetFiles(mapDocPath, context.getAssets());
+//        listAssetFiles(mapDocPath, context.getAssets());
 
         adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mapList);
         posList.setAdapter(adapter);

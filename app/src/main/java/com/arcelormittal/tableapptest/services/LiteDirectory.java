@@ -2,6 +2,7 @@ package com.arcelormittal.tableapptest.services;
 
 
 import com.arcelormittal.tableapptest.room.RoomDb;
+import com.arcelormittal.tableapptest.room.entities.Document;
 import com.arcelormittal.tableapptest.room.entities.Map;
 import com.arcelormittal.tableapptest.room.entities.Point;
 
@@ -41,6 +42,14 @@ public class LiteDirectory {
 
     public void savePoints(List<Point> points) {
         roomDb.pointDao().insertAll(points);
+    }
+
+    public void saveDocuments(List<Document> documents) {
+        roomDb.documentDao().insertAll(documents);
+    }
+
+    public Document getDocumentByShaftIdAndName(long shaftId, String name) {
+        return roomDb.documentDao().findOneByShaftId(shaftId, name);
     }
 
 

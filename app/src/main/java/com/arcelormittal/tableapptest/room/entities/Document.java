@@ -4,11 +4,13 @@ package com.arcelormittal.tableapptest.room.entities;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.arcelormittal.tableapptest.dtos.DocumentDto;
+
 @Entity
 public class Document {
 
     @PrimaryKey
-    private int id;
+    private long id;
 
     private long mapId;
 
@@ -16,7 +18,18 @@ public class Document {
 
     private byte[] file;
 
-    public int getId() {
+    public Document() {
+
+    }
+
+    public Document(DocumentDto documentDto) {
+        this.id = documentDto.id;
+        this.mapId = documentDto.shaftId;
+        this.name = documentDto.name;
+        this.file = documentDto.data;
+    }
+
+    public long getId() {
         return id;
     }
 

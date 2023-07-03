@@ -1,9 +1,9 @@
 package com.arcelormittal.tableapptest.services;
 
-import android.content.res.AssetManager;
-
+import com.arcelormittal.tableapptest.dtos.DocumentDto;
 import com.arcelormittal.tableapptest.dtos.MapDto;
 import com.arcelormittal.tableapptest.dtos.PointDto;
+import com.arcelormittal.tableapptest.room.entities.Document;
 import com.arcelormittal.tableapptest.room.entities.Map;
 import com.arcelormittal.tableapptest.room.entities.Point;
 
@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,14 +50,27 @@ public class MapUpdateService {
 
         for(MapDto shaft : shafts) {
             LiteDirectory ld = LiteDirectory.getInstance();
-
-            PointDto pointDto = jdbcService.findPointsByMap(shaft.id);
-            List<Point> points = getPoints(pointDto);
-
             try {
-                ld.saveShaft(new Map(shaft));
-                ld.removePointsByShaft(shaft.id);
-                ld.savePoints(points);
+
+                // Saving shaft
+                {
+                    ld.saveShaft(new Map(shaft));
+                    ld.removePointsByShaft(shaft.id);
+                }
+
+                // Saving points of shaft
+                {
+                    PointDto pointDto = jdbcService.findPointsByMap(shaft.id);
+                    List<Point> points = getPoints(pointDto);
+                    ld.savePoints(points);
+                }
+
+                // Saving documents of shaft
+//                {
+//                    List<Document> documents = jdbcService.findDocumentsByMap(shaft.id);
+//                    ld.saveDocuments(documents);
+//                }
+
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }

@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 public class Point {
 
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private long id;
 
     private long mapId;
 
@@ -46,7 +46,7 @@ public class Point {
         return mapId;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

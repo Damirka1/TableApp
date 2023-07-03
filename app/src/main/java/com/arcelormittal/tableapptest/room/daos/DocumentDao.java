@@ -12,11 +12,14 @@ import java.util.List;
 
 @Dao
 public interface DocumentDao {
-    @Query("SELECT * FROM Document")
-    List<Document> findAll();
+    @Query("SELECT * FROM Document WHERE mapId = :shaftId AND name = :name")
+    Document findOneByShaftId(long shaftId, String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(Document... documents);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAll(List<Document> documents);
 
     @Delete
     void delete(Document document);
