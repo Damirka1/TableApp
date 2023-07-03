@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey;
 @Entity
 public class Point {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private int id;
 
     private long mapId;
@@ -17,12 +17,13 @@ public class Point {
 
     private String text;
 
-    public Point(int x, int y, int r, String text) {
+    public Point(int x, int y, int r, String text, long mapId) {
         this.x = x;
         this.y = y;
         this.r = r;
 
         this.text = text;
+        this.mapId = mapId;
     }
 
     public int getX() {

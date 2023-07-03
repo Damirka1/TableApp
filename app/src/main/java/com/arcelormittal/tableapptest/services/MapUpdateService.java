@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,18 +23,16 @@ public class MapUpdateService {
     private boolean downloading = false;
 
     private List<Point> getPoints(PointDto pointDto) {
-        List<Point> pointList = new LinkedList<>();
-
-        BufferedReader reader;
-
+        List<Point> pointList = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(pointDto.data)));
+            pointList = new LinkedList<>();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(pointDto.data)));
             String line = reader.readLine();
 
             while (line != null) {
                 String[] res = line.split(" ");
 
-                Point point = new Point(Integer.parseInt(res[0]), Integer.parseInt(res[1]), Integer.parseInt(res[2]), res[3].toLowerCase());
+                Point point = new Point(Integer.parseInt(res[0]), Integer.parseInt(res[1]), Integer.parseInt(res[2]), res[3].toLowerCase(), pointDto.shaftId);
                 pointList.add(point);
 
                 // read next line
@@ -54,11 +53,11 @@ public class MapUpdateService {
             LiteDirectory ld = LiteDirectory.getInstance();
 
             PointDto pointDto = jdbcService.findPointsByMap(shaft.id);
-
             List<Point> points = getPoints(pointDto);
 
             try {
                 ld.saveShaft(new Map(shaft));
+                ld.removePointsByShaft(shaft.id);
                 ld.savePoints(points);
             } catch (Exception e) {
                 System.out.println(e.getMessage());

@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey;
 @Entity
 public class MapTile {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private long id;
 
     private long mapId;

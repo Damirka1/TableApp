@@ -13,8 +13,11 @@ import java.util.List;
 @Dao
 public interface PointDao {
 
-    @Query("SELECT * FROM Point")
-    List<Point> findAll();
+    @Query("SELECT * FROM Point WHERE mapId = :shaftId")
+    List<Point> findAllByShaftId(long shaftId);
+
+    @Query("DELETE FROM Point WHERE mapId = :shaftId")
+    void deleteAllByShaftId(long shaftId);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(Point... points);

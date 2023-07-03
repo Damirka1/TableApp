@@ -154,7 +154,6 @@ public class MapActivity extends AppCompatActivity {
                 }
             });
         }
-
     }
 
     @Override
@@ -173,11 +172,12 @@ public class MapActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String shaft = intent.getStringExtra("value");
+        long shaftId = intent.getLongExtra("id", 0);
 
         ListView posList = findViewById(R.id.PositionList);
         ListView searchList = findViewById(R.id.SearchPositionList);
 
-        positionsListService = new PositionsListService(shaft, getApplicationContext(), posList, searchList, this);
+        positionsListService = new PositionsListService(shaft, shaftId, getApplicationContext(), posList, searchList, this);
 
         MapView map = new MapView(getApplicationContext());
 

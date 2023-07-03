@@ -39,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createServices() {
-        RoomDb room = Room.databaseBuilder(getApplicationContext(), RoomDb.class, "pla").build();
+        RoomDb room = Room.databaseBuilder(getApplicationContext(), RoomDb.class, "pla")
+                .fallbackToDestructiveMigration().build();
         LiteDirectory.createInstance(room);
 
         mapListService = new MapListService();

@@ -18,20 +18,32 @@ import java.util.List;
 
 public class MapListService {
     private List<String> mapList;
+    private List<Map> maps;
     private ArrayAdapter<String> adapter;
 
     private void listShafts() {
         LiteDirectory ld = LiteDirectory.getInstance();
-
-        ld.getShafts().forEach((Map m) -> mapList.add(m.getName()));
+        maps = ld.getShafts();
+        mapList.clear();
+        maps.forEach((Map m) -> mapList.add(m.getName()));
     }
 
     public MapListService() {
         mapList = new LinkedList<>();
-        new Thread(this::listShafts).start();
     }
 
     public void setList(ListView list, android.content.Context context, MainActivity mainActivity) {
+
+        Thread t = new Thread(this::listShafts);
+
+        t.start();
+
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         adapter = new ArrayAdapter<>(context, R.layout.map_list_element, mapList);
         list.setAdapter(adapter);
         list.setOnItemClickListener((adapterView, view, i, l) -> {
@@ -40,6 +52,15 @@ public class MapListService {
             Intent myIntent = new Intent(mainActivity, MapActivity.class);
 
             myIntent.putExtra("value", textView.getText());
+
+            long id = 0;
+
+            for(Map m : maps) {
+                if(m.getName() == textView.getText())
+                    id = m.getId();
+            }
+
+            myIntent.putExtra("id", id);
 
             mainActivity.startActivity(myIntent);
         });

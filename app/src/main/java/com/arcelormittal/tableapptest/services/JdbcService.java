@@ -58,7 +58,7 @@ public class JdbcService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        String sql = "SELECT id, coord_and_contain FROM POINT WHERE shaft_id = " + shaftId;
+        String sql = "SELECT id, coord_and_contain, shaft_id FROM POINT WHERE shaft_id = " + shaftId;
 
         PointDto pointDto = new PointDto();
 
@@ -67,6 +67,7 @@ public class JdbcService {
             if(rs.next()) {
                 pointDto.id = rs.getInt(1);
                 pointDto.data = rs.getBytes(2);
+                pointDto.shaftId = rs.getLong(3);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

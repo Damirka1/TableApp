@@ -21,8 +21,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class PositionsListService {
+    private final long shaftId;
     private final List<String> mapList;
-    private final List<Point> points;
+    private List<Point> points;
     private final ArrayAdapter<String> adapter;
 
     private final ListView posList;
@@ -35,30 +36,9 @@ public class PositionsListService {
 
     private final MapActivity mapActivity;
 
-    private List<Point> loadPoints(String path, AssetManager assets) {
-        List<Point> pointList = new LinkedList<>();
-
-        BufferedReader reader;
-
-        try {
-            reader = new BufferedReader(new InputStreamReader(assets.open(path)));
-            String line = reader.readLine();
-
-            while (line != null) {
-                String[] res = line.split(" ");
-
-                Point point = new Point(Integer.parseInt(res[0]), Integer.parseInt(res[1]), Integer.parseInt(res[2]), res[3].toLowerCase());
-                pointList.add(point);
-
-                // read next line
-                line = reader.readLine();
-            }
-
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return pointList;
+    private void loadPoints() {
+        LiteDirectory ld = LiteDirectory.getInstance();
+        points = ld.getPointsByShaft(shaftId);
     }
 
     private boolean listAssetFiles(String path, AssetManager assets) {
@@ -91,9 +71,12 @@ public class PositionsListService {
         mapActivity.startActivity(myIntent);
     }
 
-    public PositionsListService(String path, android.content.Context context, ListView posList, ListView searchList, MapActivity mapActivity) {
+    public PositionsListService(String path, long shaftId, android.content.Context context, ListView posList, ListView searchList, MapActivity mapActivity) {
+        new Thread(this::loadPoints).start();
         this.context = context;
         this.mapActivity = mapActivity;
+
+        this.shaftId = shaftId;
 
         this.posList = posList;
         this.searchList = searchList;
@@ -101,8 +84,6 @@ public class PositionsListService {
         this.mapDocPath = path + "/Документы/";
         mapList = new LinkedList<>();
         listAssetFiles(mapDocPath, context.getAssets());
-
-        this.points = loadPoints(path + "/Точки.txt", context.getAssets());
 
         adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mapList);
         posList.setAdapter(adapter);
