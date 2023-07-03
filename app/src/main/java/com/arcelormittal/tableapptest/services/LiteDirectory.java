@@ -1,0 +1,41 @@
+package com.arcelormittal.tableapptest.services;
+
+
+import com.arcelormittal.tableapptest.dtos.PointDto;
+import com.arcelormittal.tableapptest.room.RoomDb;
+import com.arcelormittal.tableapptest.room.entities.Map;
+import com.arcelormittal.tableapptest.room.entities.Point;
+
+import java.util.List;
+
+public class LiteDirectory {
+    private static LiteDirectory INSTANCE;
+    private final RoomDb roomDb;
+
+    public static void createInstance(RoomDb roomDb) {
+        INSTANCE = new LiteDirectory(roomDb);
+    }
+
+    public static LiteDirectory getInstance() {
+        return INSTANCE;
+    }
+
+    public LiteDirectory(RoomDb roomDb) {
+        this.roomDb = roomDb;
+    }
+
+    public void saveShaft(Map map) {
+        roomDb.mapDao().insertAll(map);
+    }
+
+    public List<Map> getShafts() {
+        return roomDb.mapDao().findAll();
+    }
+
+    public void savePoints(List<Point> points) {
+        roomDb.pointDao().insertAll(points);
+    }
+
+
+
+}

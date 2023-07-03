@@ -20,14 +20,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.arcelormittal.tableapptest.entities.Point;
+import com.arcelormittal.tableapptest.room.entities.Point;
 import com.arcelormittal.tableapptest.services.PositionsListService;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
 
 import ovh.plrapps.mapview.MapView;
 import ovh.plrapps.mapview.MapViewConfiguration;

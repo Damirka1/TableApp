@@ -2,6 +2,7 @@ package com.arcelormittal.tableapptest;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.room.Room;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,15 +11,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.arcelormittal.tableapptest.services.JdbcService;
+import com.arcelormittal.tableapptest.services.LiteDirectory;
 import com.arcelormittal.tableapptest.services.MapListService;
+import com.arcelormittal.tableapptest.services.MapUpdateService;
+import com.arcelormittal.tableapptest.room.RoomDb;
 
 public class MainActivity extends AppCompatActivity {
 
     // Inflater
     private LayoutInflater vi;
 
-    // buttons
+    // Buttons
     private Button generalBtn;
     private Button mapsBtn;
     private Button settingsBtn;
@@ -28,11 +31,20 @@ public class MainActivity extends AppCompatActivity {
 
     // Services
     private MapListService mapListService;
-    private JdbcService jdbcService;
+    private MapUpdateService mapUpdateService;
 
     private void setTabView(View v) {
         viewLayout.removeAllViews();
         viewLayout.addView(v);
+    }
+
+    private void createServices() {
+        RoomDb room = Room.databaseBuilder(getApplicationContext(), RoomDb.class, "pla").build();
+        LiteDirectory.createInstance(room);
+
+        mapListService = new MapListService();
+
+        mapUpdateService = new MapUpdateService(mapListService);
     }
 
     @Override
@@ -40,9 +52,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Thread t = new Thread(() -> jdbcService = new JdbcService());
-
-        t.start();
+        createServices();
 
         vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -64,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
             ListView list = v.findViewById(R.id.MapList);
 
-            mapListService = new MapListService(getApplicationContext(), list, this);
+            mapListService.setList(list, getApplicationContext(), this);
 
             setTabView(v);
         });

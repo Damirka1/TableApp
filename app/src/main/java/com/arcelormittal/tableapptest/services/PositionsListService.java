@@ -11,7 +11,7 @@ import android.widget.Toast;
 import com.arcelormittal.tableapptest.DocumentActivity;
 import com.arcelormittal.tableapptest.MapActivity;
 import com.arcelormittal.tableapptest.R;
-import com.arcelormittal.tableapptest.entities.Point;
+import com.arcelormittal.tableapptest.room.entities.Point;
 
 import java.io.BufferedReader;
 import java.io.IOException;

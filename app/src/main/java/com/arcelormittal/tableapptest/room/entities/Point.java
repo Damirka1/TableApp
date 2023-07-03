@@ -1,13 +1,21 @@
-package com.arcelormittal.tableapptest.entities;
+package com.arcelormittal.tableapptest.room.entities;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity
 public class Point {
+
+    @PrimaryKey
+    private int id;
+
+    private long mapId;
 
     private int x;
     private int y;
     private int r;
 
     private String text;
-
 
     public Point(int x, int y, int r, String text) {
         this.x = x;
@@ -31,5 +39,21 @@ public class Point {
 
     public String getText() {
         return text;
+    }
+
+    public long getMapId() {
+        return mapId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setMapId(long mapId) {
+        this.mapId = mapId;
     }
 }

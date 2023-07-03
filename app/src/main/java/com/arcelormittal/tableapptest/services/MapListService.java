@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.arcelormittal.tableapptest.MainActivity;
 import com.arcelormittal.tableapptest.MapActivity;
 import com.arcelormittal.tableapptest.R;
+import com.arcelormittal.tableapptest.room.entities.Map;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -18,30 +19,19 @@ import java.util.List;
 public class MapListService {
     private List<String> mapList;
     private ArrayAdapter<String> adapter;
-    private ListView list;
-    private android.content.Context context;
 
-    private void listShafts(AssetManager assets) {
-        String [] list;
-        try {
-            list = assets.list("");
-            if (list.length > 0) {
-                // This is a folders
-                Collections.addAll(mapList, list);
-            }
-        } catch (IOException e) {
-            return;
-        }
+    private void listShafts() {
+        LiteDirectory ld = LiteDirectory.getInstance();
 
-        mapList.removeAll(List.of("images", "webkit"));
-
+        ld.getShafts().forEach((Map m) -> mapList.add(m.getName()));
     }
 
-    public MapListService(android.content.Context context, ListView list, MainActivity mainActivity) {
-        this.context = context;
-        this.list = list;
+    public MapListService() {
         mapList = new LinkedList<>();
-        listShafts(context.getAssets());
+        new Thread(this::listShafts).start();
+    }
+
+    public void setList(ListView list, android.content.Context context, MainActivity mainActivity) {
         adapter = new ArrayAdapter<>(context, R.layout.map_list_element, mapList);
         list.setAdapter(adapter);
         list.setOnItemClickListener((adapterView, view, i, l) -> {
@@ -53,5 +43,9 @@ public class MapListService {
 
             mainActivity.startActivity(myIntent);
         });
+    }
+
+    public List<String> getMapList() {
+        return mapList;
     }
 }
