@@ -16,8 +16,14 @@ public interface MapTileDao {
     @Query("SELECT * FROM MapTile")
     List<MapTile> findAll();
 
+    @Query("SELECT * FROM MapTile WHERE mapId = :shaftId AND `index` = :index")
+    MapTile findOneByShaftIdAndIndex(long shaftId, int index);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(MapTile... tiles);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAll(List<MapTile> tiles);
 
     @Delete
     void delete(MapTile tile);

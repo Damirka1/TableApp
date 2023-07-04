@@ -4,6 +4,7 @@ import com.arcelormittal.tableapptest.dtos.DocumentDto;
 import com.arcelormittal.tableapptest.dtos.MapDto;
 import com.arcelormittal.tableapptest.dtos.PointDto;
 import com.arcelormittal.tableapptest.room.entities.Document;
+import com.arcelormittal.tableapptest.room.entities.MapTile;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -22,7 +23,7 @@ public class JdbcService {
             connection = DriverManager.getConnection("jdbc:postgresql://home.damirka.space:5431/pla", "postgres", "SUPERHELLOWORDL123@");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-//            throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -109,5 +110,34 @@ public class JdbcService {
         }
 
         return documentDtos;
+    }
+
+    public List<MapTile> findMapTilesByMap(long shaftId) {
+        Statement st = null;
+        try {
+            st = connection.createStatement();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        String sql = "SELECT id, shaft_id, index, map_file FROM map WHERE shaft_id = " + shaftId;
+
+        List<MapTile> mapTiles = new LinkedList<>();
+
+        try {
+            ResultSet rs = st.executeQuery(sql);
+            while(rs.next()) {
+                MapTile mapTile = new MapTile();
+                mapTile.setId(rs.getInt(1));
+                mapTile.setMapId(rs.getLong(2));
+
+                mapTile.setIndex(rs.getInt(3));
+                mapTile.setFile(rs.getBytes(4));
+                mapTiles.add(mapTile);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return mapTiles;
     }
 }

@@ -20,12 +20,18 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.arcelormittal.tableapptest.room.entities.MapTile;
 import com.arcelormittal.tableapptest.room.entities.Point;
+import com.arcelormittal.tableapptest.services.LiteDirectory;
 import com.arcelormittal.tableapptest.services.PositionsListService;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Objects;
 
 import ovh.plrapps.mapview.MapView;
 import ovh.plrapps.mapview.MapViewConfiguration;
@@ -182,19 +188,17 @@ public class MapActivity extends AppCompatActivity {
         MapView map = new MapView(getApplicationContext());
 
         TileStreamProvider tileStreamProvider = (row, col, zoomLvl) -> {
-            InputStream stream;
-            try {
-                stream = getResources().getAssets().open(shaft + "/Карта/IMG-" + ((row * (fullSize / tileSize)) + col) + ".jpg");
-            } catch (IOException e) {
-//                System.out.println("Can't find file:" + e.getMessage());
-                return null;
-            }
-            return stream;
+            LiteDirectory ld = LiteDirectory.getInstance();
+            int index = ((row * (fullSize / tileSize)) + col);
+            MapTile tile = ld.getMapTileByShaftIdAndIndex(shaftId, index);
+            if(Objects.nonNull(tile))
+                return new ByteArrayInputStream(tile.getFile());
+            return null;
         };
 
         MapViewConfiguration config = new MapViewConfiguration(
                 1, fullSize, fullSize, tileSize, tileStreamProvider
-        ).setMinScale(0.3f).setMaxScale(2f).setStartScale(0.5f).setPadding(tileSize * 2).setWorkerCount(16);
+        ).setMinScale(0.3f).setMaxScale(2f).setStartScale(0.5f).setPadding(tileSize * 2).setWorkerCount(8);
 
         map.configure(config);
 

@@ -4,6 +4,7 @@ package com.arcelormittal.tableapptest.services;
 import com.arcelormittal.tableapptest.room.RoomDb;
 import com.arcelormittal.tableapptest.room.entities.Document;
 import com.arcelormittal.tableapptest.room.entities.Map;
+import com.arcelormittal.tableapptest.room.entities.MapTile;
 import com.arcelormittal.tableapptest.room.entities.Point;
 
 import java.util.List;
@@ -48,8 +49,16 @@ public class LiteDirectory {
         roomDb.documentDao().insertAll(documents);
     }
 
+    public void saveMapTiles(List<MapTile> mapTiles) {
+        roomDb.mapTileDao().insertAll(mapTiles);
+    }
+
     public Document getDocumentByShaftIdAndName(long shaftId, String name) {
         return roomDb.documentDao().findOneByShaftId(shaftId, name);
+    }
+
+    public MapTile getMapTileByShaftIdAndIndex(long shaftId, int index) {
+        return roomDb.mapTileDao().findOneByShaftIdAndIndex(shaftId, index);
     }
 
     public List<Document> getDocumentsByShaftId(long shaftId) {

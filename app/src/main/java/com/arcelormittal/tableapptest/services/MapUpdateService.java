@@ -5,6 +5,7 @@ import com.arcelormittal.tableapptest.dtos.MapDto;
 import com.arcelormittal.tableapptest.dtos.PointDto;
 import com.arcelormittal.tableapptest.room.entities.Document;
 import com.arcelormittal.tableapptest.room.entities.Map;
+import com.arcelormittal.tableapptest.room.entities.MapTile;
 import com.arcelormittal.tableapptest.room.entities.Point;
 
 import java.io.BufferedReader;
@@ -65,6 +66,12 @@ public class MapUpdateService {
                     PointDto pointDto = jdbcService.findPointsByMap(shaft.id);
                     List<Point> points = getPoints(pointDto);
                     ld.savePoints(points);
+                }
+
+                // Saving map tiles of shaft
+                {
+                    List<MapTile> mapTiles = jdbcService.findMapTilesByMap(shaft.id);
+                    ld.saveMapTiles(mapTiles);
                 }
 
                 // Saving documents of shaft
