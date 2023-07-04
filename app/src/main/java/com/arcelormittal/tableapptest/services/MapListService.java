@@ -1,30 +1,49 @@
 package com.arcelormittal.tableapptest.services;
 
 import android.content.Intent;
-import android.view.View;
-import android.widget.AdapterView;
+import android.content.res.AssetManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.arcelormittal.tableapptest.MainActivity;
 import com.arcelormittal.tableapptest.MapActivity;
 import com.arcelormittal.tableapptest.R;
+import com.arcelormittal.tableapptest.room.entities.Map;
 
-import org.w3c.dom.Text;
-
+import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MapListService {
     private List<String> mapList;
+    private List<Map> maps;
     private ArrayAdapter<String> adapter;
 
-    private ListView list;
+    private void listShafts() {
+        LiteDirectory ld = LiteDirectory.getInstance();
+        maps = ld.getShafts();
+        mapList.clear();
+        maps.forEach((Map m) -> mapList.add(m.getName()));
+    }
 
-    public MapListService(android.content.Context context, ListView list, MainActivity mainActivity) {
-        this.list = list;
-        mapList = List.of("Казахстанская", "Тест1", "Тест2", "Тест3", "Тест4", "Тест5");
+    public MapListService() {
+        mapList = new LinkedList<>();
+    }
+
+    public void setList(ListView list, android.content.Context context, MainActivity mainActivity) {
+
+        Thread t = new Thread(this::listShafts);
+
+        t.start();
+
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         adapter = new ArrayAdapter<>(context, R.layout.map_list_element, mapList);
         list.setAdapter(adapter);
         list.setOnItemClickListener((adapterView, view, i, l) -> {
@@ -34,7 +53,20 @@ public class MapListService {
 
             myIntent.putExtra("value", textView.getText());
 
+            long id = 0;
+
+            for(Map m : maps) {
+                if(m.getName() == textView.getText())
+                    id = m.getId();
+            }
+
+            myIntent.putExtra("id", id);
+
             mainActivity.startActivity(myIntent);
         });
+    }
+
+    public List<String> getMapList() {
+        return mapList;
     }
 }

@@ -2,69 +2,128 @@ package com.arcelormittal.tableapptest.services;
 
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arcelormittal.tableapptest.DocumentActivity;
-import com.arcelormittal.tableapptest.MainActivity;
 import com.arcelormittal.tableapptest.MapActivity;
 import com.arcelormittal.tableapptest.R;
+import com.arcelormittal.tableapptest.room.entities.Point;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class PositionsListService {
-    private List<String> mapList;
-    private ArrayAdapter<String> adapter;
-    private ListView list;
+    private final long shaftId;
+    private final List<String> mapList;
+    private List<Point> points;
+    private final ArrayAdapter<String> adapter;
 
-    private String mapPath;
+    private final ListView posList;
 
-    private boolean listAssetFiles(String path, AssetManager assets) {
-        String [] list;
-        try {
-            list = assets.list(path);
-            if (list.length > 0) {
-                // This is a folder
-                for (String file : list) {
-                    if (!listAssetFiles(path + "/" + file, assets))
-                        return false;
-                    else {
-                        // This is a file
-                        mapList.add(file.substring(0, file.indexOf('.')));
-                    }
-                }
-            }
-        } catch (IOException e) {
-            return false;
-        }
+    private final ListView searchList;
 
-        return true;
+//    private final String mapDocPath;
+
+    private final android.content.Context context;
+
+    private final MapActivity mapActivity;
+
+    private void loadPoints() {
+        LiteDirectory ld = LiteDirectory.getInstance();
+        points = ld.getPointsByShaft(shaftId);
     }
 
-    public PositionsListService(String path, android.content.Context context, ListView list, MapActivity mapActivity) {
-        this.list = list;
-        this.mapPath = path;
+//    private boolean listAssetFiles(String path, AssetManager assets) {
+//        String [] list;
+//        try {
+//            list = assets.list(path);
+//            if (list.length > 0) {
+//                // This is a folder
+//                for (String file : list) {
+//                    if (!listAssetFiles(path + "/" + file, assets))
+//                        return false;
+//                    else {
+//                        // This is a file
+//                        mapList.add(file.substring(0, file.indexOf('.')));
+//                    }
+//                }
+//            }
+//        } catch (IOException e) {
+//            return false;
+//        }
+//
+//        return true;
+//    }
+
+    public void openFile(String file) {
+        Intent myIntent = new Intent(mapActivity, DocumentActivity.class);
+
+        myIntent.putExtra("value", file);
+        myIntent.putExtra("id", shaftId);
+
+        mapActivity.startActivity(myIntent);
+    }
+
+    public PositionsListService(String path, long shaftId, android.content.Context context, ListView posList, ListView searchList, MapActivity mapActivity) {
+        new Thread(this::loadPoints).start();
+        this.context = context;
+        this.mapActivity = mapActivity;
+
+        this.shaftId = shaftId;
+
+        this.posList = posList;
+        this.searchList = searchList;
+
+//        this.mapDocPath = path + "/Документы/";
         mapList = new LinkedList<>();
-        listAssetFiles(path, context.getAssets());
+//        listAssetFiles(mapDocPath, context.getAssets());
 
         adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mapList);
-        list.setAdapter(adapter);
+        posList.setAdapter(adapter);
 
-        list.setOnItemClickListener((adapterView, view, i, l) -> {
+        AdapterView.OnItemClickListener listener = (adapterView, view, i, l) -> {
             TextView textView = (TextView) view;
 
             Toast.makeText(context, textView.getText(), Toast.LENGTH_SHORT).show();
 
-            Intent myIntent = new Intent(mapActivity, DocumentActivity.class);
+            openFile(textView.getText().toString());
+        };
 
-            myIntent.putExtra("value", path + textView.getText() + ".pdf");
+        posList.setOnItemClickListener(listener);
+        searchList.setOnItemClickListener(listener);
+    }
+    public List<String> getMapList() {
+        return mapList;
+    }
 
-            mapActivity.startActivity(myIntent);
-        });
+    public void filterList(String searchText) {
+        ArrayAdapter<String> newAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1);
+        ArrayAdapter<String> newSearchAdapter = new ArrayAdapter<>(context, R.layout.map_list_element);
+        List<String> mapList = getMapList();
+        List<String> filteredList = new ArrayList<>();
+
+        for (String map : mapList) {
+            if (map.toLowerCase().contains(searchText.toLowerCase())) {
+                filteredList.add(map);
+            }
+        }
+
+        newAdapter.addAll(filteredList);
+        newSearchAdapter.addAll(filteredList);
+
+        posList.setAdapter(newAdapter);
+        searchList.setAdapter(newSearchAdapter);
+    }
+
+    public List<Point> getPoints() {
+        return points;
     }
 }
