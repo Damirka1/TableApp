@@ -45,6 +45,8 @@ public class MapUpdateService {
         return pointList;
     }
     private void downloadAllMaps() {
+        downloading = true;
+
         JdbcService jdbcService = new JdbcService();
         List<MapDto> shafts = jdbcService.listAllShafts();
 
@@ -66,10 +68,10 @@ public class MapUpdateService {
                 }
 
                 // Saving documents of shaft
-//                {
-//                    List<Document> documents = jdbcService.findDocumentsByMap(shaft.id);
-//                    ld.saveDocuments(documents);
-//                }
+                {
+                    List<Document> documents = jdbcService.findDocumentsByMap(shaft.id);
+                    ld.saveDocuments(documents);
+                }
 
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -80,13 +82,31 @@ public class MapUpdateService {
         downloading = false;
     }
 
+    private void clearAllDb() {
+        LiteDirectory ld = LiteDirectory.getInstance();
+        ld.forceClearAll();
+    }
+
+    private void checkUpdate() {
+        List<Map> maps = LiteDirectory.getInstance().getShafts();
+
+        if(maps.size() == 0) {
+            new Thread(this::downloadAllMaps).start();
+        }
+    }
+
     public MapUpdateService(MapListService mapListService) {
         this.mapListService = mapListService;
 
-        if(mapListService.getMapList().size() >= 0) {
-            downloading = true;
-            new Thread(this::downloadAllMaps).start();
-        }
+        new Thread(this::checkUpdate).start();
+    }
+
+    public void forceClear() {
+        new Thread(this::clearAllDb).start();
+    }
+
+    public void forceDownload() {
+        new Thread(this::downloadAllMaps).start();
     }
 
     public boolean isDownloading() {

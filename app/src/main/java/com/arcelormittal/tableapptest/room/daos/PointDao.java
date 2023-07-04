@@ -27,4 +27,7 @@ public interface PointDao {
 
     @Delete
     void delete(Point point);
+
+    @Query("DELETE FROM Point")
+    void removeAll();
 }

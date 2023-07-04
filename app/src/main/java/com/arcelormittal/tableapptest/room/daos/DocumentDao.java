@@ -15,6 +15,9 @@ public interface DocumentDao {
     @Query("SELECT * FROM Document WHERE mapId = :shaftId AND name = :name")
     Document findOneByShaftId(long shaftId, String name);
 
+    @Query("SELECT * FROM Document WHERE mapId = :shaftId")
+    List<Document> findByShaftId(long shaftId);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(Document... documents);
 
@@ -23,4 +26,7 @@ public interface DocumentDao {
 
     @Delete
     void delete(Document document);
+
+    @Query("DELETE FROM Document")
+    void removeAll();
 }

@@ -21,4 +21,7 @@ public interface MapDao {
 
     @Delete
     void delete(Map map);
+
+    @Query("DELETE FROM Map")
+    void removeAll();
 }

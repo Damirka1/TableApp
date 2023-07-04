@@ -177,7 +177,7 @@ public class MapActivity extends AppCompatActivity {
         ListView posList = findViewById(R.id.PositionList);
         ListView searchList = findViewById(R.id.SearchPositionList);
 
-        positionsListService = new PositionsListService(shaft, shaftId, getApplicationContext(), posList, searchList, this);
+        positionsListService = new PositionsListService(shaftId, getApplicationContext(), posList, searchList, this);
 
         MapView map = new MapView(getApplicationContext());
 

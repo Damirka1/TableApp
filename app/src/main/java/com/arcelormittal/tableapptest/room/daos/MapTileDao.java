@@ -21,4 +21,7 @@ public interface MapTileDao {
 
     @Delete
     void delete(MapTile tile);
+
+    @Query("DELETE FROM MapTile")
+    void removeAll();
 }

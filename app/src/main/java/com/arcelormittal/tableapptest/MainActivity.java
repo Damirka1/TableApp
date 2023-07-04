@@ -10,11 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.arcelormittal.tableapptest.services.LiteDirectory;
 import com.arcelormittal.tableapptest.services.MapListService;
 import com.arcelormittal.tableapptest.services.MapUpdateService;
 import com.arcelormittal.tableapptest.room.RoomDb;
+
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,9 +32,15 @@ public class MainActivity extends AppCompatActivity {
     // View layout
     private ConstraintLayout viewLayout;
 
+    private ProgressBar loadingProgressBar;
+
     // Services
     private MapListService mapListService;
     private MapUpdateService mapUpdateService;
+
+    // Threads
+
+    private Thread downloadThread;
 
     private void setTabView(View v) {
         viewLayout.removeAllViews();
@@ -48,6 +57,14 @@ public class MainActivity extends AppCompatActivity {
         mapUpdateService = new MapUpdateService(mapListService);
     }
 
+    private void showLoading() {
+        loadingProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
+        loadingProgressBar.setVisibility(View.GONE);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         settingsBtn = findViewById(R.id.SettingsButton);
 
         viewLayout = findViewById(R.id.TabView);
+        loadingProgressBar = findViewById(R.id.LoadingProgressBar);
 
         generalBtn.setOnClickListener(view -> {
             View v = vi.inflate(R.layout.general_view, null);
@@ -72,16 +90,47 @@ public class MainActivity extends AppCompatActivity {
 
         mapsBtn.setOnClickListener(view -> {
             View v = vi.inflate(R.layout.maps_list, null);
-
             ListView list = v.findViewById(R.id.MapList);
 
-            mapListService.setList(list, getApplicationContext(), this);
+            if(mapUpdateService.isDownloading()) {
+                if(Objects.isNull(downloadThread)) {
+                    downloadThread = new Thread(() -> {
+                        runOnUiThread(this::showLoading);
+
+                        while(mapUpdateService.isDownloading()) {
+                            try {
+                                Thread.sleep(10);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+
+                        runOnUiThread(() -> {
+                            hideLoading();
+                            mapListService.setList(list, getApplicationContext(), this);
+                        });
+
+                    });
+                    downloadThread.start();
+                }
+            }
+            else
+                mapListService.setList(list, getApplicationContext(), this);
 
             setTabView(v);
         });
 
         settingsBtn.setOnClickListener(view -> {
             View v = vi.inflate(R.layout.settings_view, null);
+
+            // Setting buttons
+            Button roomResetBtn = v.findViewById(R.id.RoomReset);
+            Button roomDownloadBtn = v.findViewById(R.id.RoomDownload);
+
+            roomResetBtn.setOnClickListener(resetView -> mapUpdateService.forceClear());
+
+            roomDownloadBtn.setOnClickListener(resetView -> mapUpdateService.forceDownload());
+
             setTabView(v);
         });
     }

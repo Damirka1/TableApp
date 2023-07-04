@@ -15,14 +15,14 @@ import java.util.List;
 
 public class JdbcService {
 
-    private final Connection connection;
+    private Connection connection;
 
     public JdbcService() {
         try {
-            connection = DriverManager.getConnection("jdbc:postgresql://192.168.1.30:5431/pla", "postgres", "SUPERHELLOWORDL123@");
+            connection = DriverManager.getConnection("jdbc:postgresql://home.damirka.space:5431/pla", "postgres", "SUPERHELLOWORDL123@");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
         }
     }
 
@@ -60,7 +60,7 @@ public class JdbcService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        String sql = "SELECT id, coord_and_contain, shaft_id FROM point WHERE shaft_id = " + shaftId;
+        String sql = "SELECT id, data, shaft_id FROM point WHERE shaft_id = " + shaftId;
 
         PointDto pointDto = new PointDto();
 

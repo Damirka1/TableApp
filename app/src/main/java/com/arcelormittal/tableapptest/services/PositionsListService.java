@@ -1,7 +1,6 @@
 package com.arcelormittal.tableapptest.services;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -11,18 +10,17 @@ import android.widget.Toast;
 import com.arcelormittal.tableapptest.DocumentActivity;
 import com.arcelormittal.tableapptest.MapActivity;
 import com.arcelormittal.tableapptest.R;
+import com.arcelormittal.tableapptest.room.entities.Document;
 import com.arcelormittal.tableapptest.room.entities.Point;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PositionsListService {
     private final long shaftId;
-    private final List<String> mapList;
+    private final List<String> mapList = new LinkedList<>();;
     private List<Point> points;
     private final ArrayAdapter<String> adapter;
 
@@ -39,29 +37,8 @@ public class PositionsListService {
     private void loadPoints() {
         LiteDirectory ld = LiteDirectory.getInstance();
         points = ld.getPointsByShaft(shaftId);
+        mapList.addAll(ld.getDocumentsByShaftId(shaftId).stream().map(Document::getName).collect(Collectors.toList()));
     }
-
-//    private boolean listAssetFiles(String path, AssetManager assets) {
-//        String [] list;
-//        try {
-//            list = assets.list(path);
-//            if (list.length > 0) {
-//                // This is a folder
-//                for (String file : list) {
-//                    if (!listAssetFiles(path + "/" + file, assets))
-//                        return false;
-//                    else {
-//                        // This is a file
-//                        mapList.add(file.substring(0, file.indexOf('.')));
-//                    }
-//                }
-//            }
-//        } catch (IOException e) {
-//            return false;
-//        }
-//
-//        return true;
-//    }
 
     public void openFile(String file) {
         Intent myIntent = new Intent(mapActivity, DocumentActivity.class);
@@ -72,7 +49,7 @@ public class PositionsListService {
         mapActivity.startActivity(myIntent);
     }
 
-    public PositionsListService(String path, long shaftId, android.content.Context context, ListView posList, ListView searchList, MapActivity mapActivity) {
+    public PositionsListService(long shaftId, android.content.Context context, ListView posList, ListView searchList, MapActivity mapActivity) {
         new Thread(this::loadPoints).start();
         this.context = context;
         this.mapActivity = mapActivity;
@@ -81,10 +58,6 @@ public class PositionsListService {
 
         this.posList = posList;
         this.searchList = searchList;
-
-//        this.mapDocPath = path + "/Документы/";
-        mapList = new LinkedList<>();
-//        listAssetFiles(mapDocPath, context.getAssets());
 
         adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mapList);
         posList.setAdapter(adapter);

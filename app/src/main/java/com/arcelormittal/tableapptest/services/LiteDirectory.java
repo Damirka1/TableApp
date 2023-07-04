@@ -52,6 +52,15 @@ public class LiteDirectory {
         return roomDb.documentDao().findOneByShaftId(shaftId, name);
     }
 
+    public List<Document> getDocumentsByShaftId(long shaftId) {
+        return roomDb.documentDao().findByShaftId(shaftId);
+    }
 
+    public void forceClearAll() {
+        roomDb.documentDao().removeAll();
+        roomDb.mapDao().removeAll();
+        roomDb.pointDao().removeAll();
+        roomDb.mapTileDao().removeAll();
+    }
 
 }
