@@ -149,14 +149,18 @@ public class MapActivity extends AppCompatActivity {
                 String position = ((TextView)v.findViewById(R.id.MarkerTest)).getText().toString();
                 String positionWithoutLetters = position.replaceAll("([а-я])", "");
 
-                if(Integer.parseInt(positionWithoutLetters) < 100)
-                    position = "0" + position;
-
                 try {
-                    positionsListService.openFile(position);
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                    Toast.makeText(this, "Can't find file", Toast.LENGTH_SHORT).show();
+                    if(Integer.parseInt(positionWithoutLetters) < 100)
+                        position = "0" + position;
+
+                    try {
+                        positionsListService.openFile(position);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        Toast.makeText(this, "Can't find file", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (NumberFormatException numberFormatException) {
+                    Toast.makeText(this, "Невозможно обработать данную точку", Toast.LENGTH_SHORT).show();
                 }
             });
         }
