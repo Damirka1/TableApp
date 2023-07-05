@@ -12,7 +12,7 @@ import com.arcelormittal.tableapptest.room.entities.Map;
 import com.arcelormittal.tableapptest.room.entities.MapTile;
 import com.arcelormittal.tableapptest.room.entities.Point;
 
-@Database(entities = {Map.class, Document.class, MapTile.class, Point.class}, version = 3)
+@Database(entities = {Map.class, Document.class, MapTile.class, Point.class}, version = 5)
 public abstract class RoomDb extends RoomDatabase {
     public abstract MapDao mapDao();
     public abstract DocumentDao documentDao();

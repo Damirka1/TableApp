@@ -1,6 +1,7 @@
 package com.arcelormittal.tableapptest.services;
 
 
+import com.arcelormittal.tableapptest.dtos.MapDto;
 import com.arcelormittal.tableapptest.room.RoomDb;
 import com.arcelormittal.tableapptest.room.entities.Document;
 import com.arcelormittal.tableapptest.room.entities.Map;
@@ -8,6 +9,7 @@ import com.arcelormittal.tableapptest.room.entities.MapTile;
 import com.arcelormittal.tableapptest.room.entities.Point;
 
 import java.util.List;
+import java.util.Objects;
 
 public class LiteDirectory {
     private static LiteDirectory INSTANCE;
@@ -25,8 +27,27 @@ public class LiteDirectory {
         this.roomDb = roomDb;
     }
 
-    public void saveShaft(Map map) {
+    public boolean needUpdate(MapDto mapDto) {
+        Map map = roomDb.mapDao().findOne(mapDto.name);
+
+        if(Objects.isNull(map))
+            return true;
+
+        return map.getCreated().before(mapDto.created);
+    }
+
+    public Map saveShaft(MapDto mapDto) {
+        Map map = roomDb.mapDao().findOne(mapDto.name);
+
+        if(Objects.isNull(map))
+            map = new Map(mapDto);
+        else
+            map.setCreated(mapDto.created);
+
         roomDb.mapDao().insertAll(map);
+        map = roomDb.mapDao().findOne(mapDto.name);
+
+        return map;
     }
 
     public List<Map> getShafts() {

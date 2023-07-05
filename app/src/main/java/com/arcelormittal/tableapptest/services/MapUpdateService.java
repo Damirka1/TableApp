@@ -53,30 +53,35 @@ public class MapUpdateService {
 
         for(MapDto shaft : shafts) {
             LiteDirectory ld = LiteDirectory.getInstance();
-            try {
 
+            // TODO: Optimize this
+            try {
+                Map map;
                 // Saving shaft
                 {
-                    ld.saveShaft(new Map(shaft));
-                    ld.removePointsByShaft(shaft.id);
+                    if(!ld.needUpdate(shaft))
+                        continue;
+
+                    map = ld.saveShaft(shaft);
+                    ld.removePointsByShaft(map.getId());
                 }
 
                 // Saving points of shaft
                 {
-                    PointDto pointDto = jdbcService.findPointsByMap(shaft.id);
+                    PointDto pointDto = jdbcService.findPointsByMap(map, shaft.id);
                     List<Point> points = getPoints(pointDto);
                     ld.savePoints(points);
                 }
 
                 // Saving map tiles of shaft
                 {
-                    List<MapTile> mapTiles = jdbcService.findMapTilesByMap(shaft.id);
+                    List<MapTile> mapTiles = jdbcService.findMapTilesByMap(map, shaft.id);
                     ld.saveMapTiles(mapTiles);
                 }
 
                 // Saving documents of shaft
                 {
-                    List<Document> documents = jdbcService.findDocumentsByMap(shaft.id);
+                    List<Document> documents = jdbcService.findDocumentsByMap(map, shaft.id);
                     ld.saveDocuments(documents);
                 }
 

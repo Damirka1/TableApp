@@ -4,6 +4,7 @@ import com.arcelormittal.tableapptest.dtos.DocumentDto;
 import com.arcelormittal.tableapptest.dtos.MapDto;
 import com.arcelormittal.tableapptest.dtos.PointDto;
 import com.arcelormittal.tableapptest.room.entities.Document;
+import com.arcelormittal.tableapptest.room.entities.Map;
 import com.arcelormittal.tableapptest.room.entities.MapTile;
 
 import java.sql.Connection;
@@ -34,16 +35,17 @@ public class JdbcService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        String sql = "SELECT id, name FROM shaft";
+        String sql = "select max(id), name, max(created) as created from shaft s group by name";
 
         List<MapDto> maps = new LinkedList<>();
 
         try {
             ResultSet rs = st.executeQuery(sql);
-            if(rs.next()) {
+            while(rs.next()) {
                 MapDto map = new MapDto();
-                map.id = rs.getInt(1);
+                map.id = rs.getLong(1);
                 map.name = rs.getString(2);
+                map.created = rs.getDate(3);
 
                 maps.add(map);
             }
@@ -54,23 +56,22 @@ public class JdbcService {
         return maps;
     }
 
-    public PointDto findPointsByMap(long shaftId) {
+    public PointDto findPointsByMap(Map map, long shaftId) {
         Statement st = null;
         try {
             st = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        String sql = "SELECT id, data, shaft_id FROM point WHERE shaft_id = " + shaftId;
+        String sql = "SELECT data FROM point WHERE shaft_id = " + shaftId;
 
         PointDto pointDto = new PointDto();
 
         try {
             ResultSet rs = st.executeQuery(sql);
             if(rs.next()) {
-                pointDto.id = rs.getInt(1);
-                pointDto.data = rs.getBytes(2);
-                pointDto.shaftId = rs.getLong(3);
+                pointDto.data = rs.getBytes(1);
+                pointDto.shaftId = map.getId();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -79,14 +80,14 @@ public class JdbcService {
         return pointDto;
     }
 
-    public List<Document> findDocumentsByMap(long shaftId) {
+    public List<Document> findDocumentsByMap(Map map, long shaftId) {
         Statement st = null;
         try {
             st = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        String sql = "SELECT id, shaft_id, name, doc_file FROM doc WHERE shaft_id = " + shaftId;
+        String sql = "SELECT name, doc_file FROM doc WHERE shaft_id = " + shaftId;
 
         List<Document> documentDtos = new LinkedList<>();
 
@@ -94,15 +95,14 @@ public class JdbcService {
             ResultSet rs = st.executeQuery(sql);
             while(rs.next()) {
                 Document document = new Document();
-                document.setId(rs.getInt(1));
-                document.setMapId(rs.getLong(2));
+                document.setMapId(map.getId());
 
                 // remove ext from filename
-                String name = rs.getString(3);
+                String name = rs.getString(1);
                 name = name.substring(0, name.lastIndexOf('.'));
 
                 document.setName(name);
-                document.setFile(rs.getBytes(4));
+                document.setFile(rs.getBytes(2));
                 documentDtos.add(document);
             }
         } catch (SQLException e) {
@@ -112,14 +112,14 @@ public class JdbcService {
         return documentDtos;
     }
 
-    public List<MapTile> findMapTilesByMap(long shaftId) {
+    public List<MapTile> findMapTilesByMap(Map map, long shaftId) {
         Statement st = null;
         try {
             st = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        String sql = "SELECT id, shaft_id, index, map_file FROM map WHERE shaft_id = " + shaftId;
+        String sql = "SELECT index, map_file FROM map WHERE shaft_id = " + shaftId;
 
         List<MapTile> mapTiles = new LinkedList<>();
 
@@ -127,11 +127,10 @@ public class JdbcService {
             ResultSet rs = st.executeQuery(sql);
             while(rs.next()) {
                 MapTile mapTile = new MapTile();
-                mapTile.setId(rs.getInt(1));
-                mapTile.setMapId(rs.getLong(2));
+                mapTile.setMapId(map.getId());
 
-                mapTile.setIndex(rs.getInt(3));
-                mapTile.setFile(rs.getBytes(4));
+                mapTile.setIndex(rs.getInt(1));
+                mapTile.setFile(rs.getBytes(2));
                 mapTiles.add(mapTile);
             }
         } catch (SQLException e) {

@@ -9,7 +9,7 @@ import com.arcelormittal.tableapptest.dtos.DocumentDto;
 @Entity
 public class Document {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private long id;
 
     private long mapId;

@@ -2,24 +2,27 @@ package com.arcelormittal.tableapptest.room.entities;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 import com.arcelormittal.tableapptest.dtos.MapDto;
+import com.arcelormittal.tableapptest.room.convertors.TimestampConverter;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 public class Map {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private long id;
     private String name;
-//    private LocalDateTime created;
+    @TypeConverters({TimestampConverter.class})
+    private Date created;
 
     public Map() {
     }
 
     public Map(MapDto mapDto) {
-        this.id = mapDto.id;
         this.name = mapDto.name;
+        this.created = mapDto.created;
     }
 
     public long getId() {
@@ -36,5 +39,13 @@ public class Map {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }

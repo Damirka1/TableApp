@@ -16,6 +16,9 @@ public interface MapDao {
     @Query("SELECT * FROM Map")
     List<Map> findAll();
 
+    @Query("SELECT * FROM Map WHERE name = :name")
+    Map findOne(String name);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(Map... maps);
 
