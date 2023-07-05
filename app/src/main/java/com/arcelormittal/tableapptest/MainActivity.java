@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
     private MapUpdateService mapUpdateService;
 
     // Threads
-
     private Thread downloadThread;
 
     private void setTabView(View v) {
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         createServices();
 
-        vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         generalBtn = findViewById(R.id.GeneralButton);
         mapsBtn = findViewById(R.id.MapsButton);
@@ -82,14 +81,14 @@ public class MainActivity extends AppCompatActivity {
         loadingProgressBar = findViewById(R.id.LoadingProgressBar);
 
         generalBtn.setOnClickListener(view -> {
-            View v = vi.inflate(R.layout.general_view, null);
+            View v = vi.inflate(R.layout.general_view, viewLayout, false);
             setTabView(v);
         });
 
         generalBtn.performClick();
 
         mapsBtn.setOnClickListener(view -> {
-            View v = vi.inflate(R.layout.maps_list, null);
+            View v = vi.inflate(R.layout.maps_list, viewLayout, false);
             ListView list = v.findViewById(R.id.MapList);
 
             if(mapUpdateService.isDownloading()) {
@@ -121,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         settingsBtn.setOnClickListener(view -> {
-            View v = vi.inflate(R.layout.settings_view, null);
+            View v = vi.inflate(R.layout.settings_view, viewLayout, false);
 
             // Setting buttons
             Button roomResetBtn = v.findViewById(R.id.RoomReset);
