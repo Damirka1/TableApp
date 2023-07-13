@@ -20,11 +20,14 @@ public class UserService {
     private void getUser() {
         // TODO: get user from room db
 
-        user = new User();
+        user = LiteDirectory.getInstance().getUser();
+        if(Objects.isNull(user))
+            user = new User();
     }
 
     private void saveUser() {
-        // TODO: make saving
+        LiteDirectory ld = LiteDirectory.getInstance();
+        ld.saveUser(user);
     }
 
     public UserService() {
@@ -43,10 +46,6 @@ public class UserService {
     }
 
     public void saveCode(String code) {
-        // TODO: make code saving in room db
-
-//        LiteDirectory ld = LiteDirectory.getInstance();
-
         user.setCode(code);
         user.setFirstStartup(false);
 

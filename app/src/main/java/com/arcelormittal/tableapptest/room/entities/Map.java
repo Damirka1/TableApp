@@ -7,7 +7,7 @@ import androidx.room.TypeConverters;
 import com.arcelormittal.tableapptest.dtos.MapDto;
 import com.arcelormittal.tableapptest.room.convertors.TimestampConverter;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Entity
 public class Map {
@@ -15,7 +15,7 @@ public class Map {
     private long id;
     private String name;
     @TypeConverters({TimestampConverter.class})
-    private Date created;
+    private Instant created;
 
     public Map() {
     }
@@ -41,11 +41,11 @@ public class Map {
         this.name = name;
     }
 
-    public Date getCreated() {
+    public Instant getCreated() {
         return created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated(Instant created) {
         this.created = created;
     }
 }

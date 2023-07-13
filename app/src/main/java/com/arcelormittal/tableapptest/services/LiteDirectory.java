@@ -7,6 +7,7 @@ import com.arcelormittal.tableapptest.room.entities.Document;
 import com.arcelormittal.tableapptest.room.entities.Map;
 import com.arcelormittal.tableapptest.room.entities.MapTile;
 import com.arcelormittal.tableapptest.room.entities.Point;
+import com.arcelormittal.tableapptest.room.entities.User;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +34,7 @@ public class LiteDirectory {
         if(Objects.isNull(map))
             return true;
 
-        return map.getCreated().before(mapDto.created);
+        return map.getCreated().isBefore(mapDto.created);
     }
 
     public Map saveShaft(MapDto mapDto) {
@@ -84,6 +85,14 @@ public class LiteDirectory {
 
     public List<Document> getDocumentsByShaftId(long shaftId) {
         return roomDb.documentDao().findByShaftId(shaftId);
+    }
+
+    public void saveUser(User user) {
+        roomDb.userDao().insert(user);
+    }
+
+    public User getUser() {
+        return roomDb.userDao().getUser();
     }
 
     public void forceClearAll() {

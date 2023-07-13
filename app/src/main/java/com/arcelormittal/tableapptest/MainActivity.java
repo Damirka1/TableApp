@@ -22,7 +22,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,8 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
     // View layout
     private ConstraintLayout viewLayout;
-
-    private ProgressBar loadingProgressBar;
 
     // Services
     private MapListService mapListService;
@@ -58,15 +55,51 @@ public class MainActivity extends AppCompatActivity {
 
         mapListService = new MapListService();
 
-        mapUpdateService = new MapUpdateService(mapListService);
+        mapUpdateService = new MapUpdateService();
     }
 
-    private void showLoading() {
-        loadingProgressBar.setVisibility(View.VISIBLE);
-    }
+    private void checkMapDownloading(View v)
+    {
+        TextView loadingText = v.findViewById(R.id.LoadingText);
 
-    private void hideLoading() {
-        loadingProgressBar.setVisibility(View.GONE);
+        ProgressBar loadingProgressBar = v.findViewById(R.id.LoadingProgressBar);
+
+        if(mapUpdateService.isDownloading()) {
+            loadingText.setVisibility(View.VISIBLE);
+            loadingProgressBar.setVisibility(View.VISIBLE);
+
+            if(Objects.nonNull(downloadThread)) {
+                downloadThread.interrupt();
+                downloadThread = null;
+            }
+
+            downloadThread = new Thread(() -> {
+                while(mapUpdateService.isDownloading()) {
+                    loadingProgressBar.setProgress(mapUpdateService.getProgress());
+
+                    if(Thread.currentThread().isInterrupted())
+                        return;
+
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                }
+
+                runOnUiThread(() -> {
+                    loadingText.setVisibility(View.GONE);
+                    loadingProgressBar.setVisibility(View.GONE);
+                });
+
+            });
+            downloadThread.start();
+        }
+        else
+        {
+            loadingText.setVisibility(View.GONE);
+            loadingProgressBar.setVisibility(View.GONE);
+        }
     }
 
     private void openGeneral(View view) {
@@ -90,15 +123,54 @@ public class MainActivity extends AppCompatActivity {
                     if(Objects.nonNull(codeInput.getText())) {
                         String code = codeInput.getText().toString();
 
+                        code = "Казахстанская";
+
                         UserService.getInstance().saveCode(code);
 
                         codeInputLayout.setVisibility(View.GONE);
                         textInfo.setVisibility(View.GONE);
                         codeInput.setVisibility(View.GONE);
                         confirm.setVisibility(View.GONE);
+
+                        mapUpdateService.forceDownload();
+
+                        checkMapDownloading(v);
                     }
                 });
             }
+            else
+            {
+                TextView updateText = v.findViewById(R.id.UpdateText);
+                Button updateButton = v.findViewById(R.id.DownloadUpdateButton);
+
+                if(mapUpdateService.checkUpdate())
+                {
+                    updateText.setText("Доступно обновление");
+
+                    runOnUiThread(() -> {
+                        updateButton.setVisibility(View.VISIBLE);
+                        updateText.setVisibility(View.VISIBLE);
+                    });
+
+                    updateButton.setOnClickListener((View v2) -> {
+                        updateButton.setVisibility(View.GONE);
+                        mapUpdateService.forceDownload();
+                        checkMapDownloading(v);
+
+                        updateText.setText("Обновлений нет");
+                    });
+
+                }
+                else
+                {
+                    runOnUiThread(() -> {
+                        updateText.setText("Обновлений нет");
+                        updateText.setVisibility(View.VISIBLE);
+                        checkMapDownloading(v);
+                    });
+                }
+            }
+
         }).start();
 
         setTabView(v);
@@ -107,31 +179,7 @@ public class MainActivity extends AppCompatActivity {
     private void openMaps(View view) {
         View v = vi.inflate(R.layout.maps_list, viewLayout, false);
         ListView list = v.findViewById(R.id.MapList);
-
-        if(mapUpdateService.isDownloading()) {
-            if(Objects.isNull(downloadThread)) {
-                downloadThread = new Thread(() -> {
-                    runOnUiThread(this::showLoading);
-
-                    while(mapUpdateService.isDownloading()) {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-
-                    runOnUiThread(() -> {
-                        hideLoading();
-                        mapListService.setList(list, getApplicationContext(), this);
-                    });
-
-                });
-                downloadThread.start();
-            }
-        }
-        else
-            mapListService.setList(list, getApplicationContext(), this);
+        mapListService.setList(list, getApplicationContext(), this);
 
         setTabView(v);
     }
@@ -179,9 +227,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Get tab layouts
         viewLayout = findViewById(R.id.TabView);
-
-        // Get loading bar
-        loadingProgressBar = findViewById(R.id.LoadingProgressBar);
 
         // Set up listeners
         generalBtn.setOnClickListener(this::openGeneral);

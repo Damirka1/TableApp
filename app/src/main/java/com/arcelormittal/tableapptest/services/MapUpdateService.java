@@ -1,6 +1,5 @@
 package com.arcelormittal.tableapptest.services;
 
-import com.arcelormittal.tableapptest.dtos.DocumentDto;
 import com.arcelormittal.tableapptest.dtos.MapDto;
 import com.arcelormittal.tableapptest.dtos.PointDto;
 import com.arcelormittal.tableapptest.room.entities.Document;
@@ -14,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class MapUpdateService {
 
@@ -21,6 +21,7 @@ public class MapUpdateService {
     private List<String> mapsToUpdate = new LinkedList<>();
 
     private boolean downloading = false;
+    private int progress = 0;
 
     private List<Point> getPoints(PointDto pointDto) {
         List<Point> pointList = null;
@@ -45,53 +46,62 @@ public class MapUpdateService {
         }
         return pointList;
     }
-    private void downloadAllMaps() {
-        downloading = true;
+    private void downloadMap() {
+        String name = UserService.getInstance().getCode();
+
+        if(Objects.isNull(name))
+            return;
 
         JdbcService jdbcService = new JdbcService();
-        List<MapDto> shafts = jdbcService.listAllShafts();
 
-        for(MapDto shaft : shafts) {
-            LiteDirectory ld = LiteDirectory.getInstance();
+        downloading = true;
+        progress = 0;
 
-            // TODO: Optimize this
-            try {
-                Map map;
-                // Saving shaft
-                {
-                    if(!ld.needUpdate(shaft))
-                        continue;
+        MapDto shaft = jdbcService.findShaftByName(name);
+        LiteDirectory ld = LiteDirectory.getInstance();
 
-                    map = ld.saveShaft(shaft);
-                    ld.removePointsByShaft(map.getId());
-                }
-
-                // Saving points of shaft
-                {
-                    PointDto pointDto = jdbcService.findPointsByMap(map, shaft.id);
-                    List<Point> points = getPoints(pointDto);
-                    ld.savePoints(points);
-                }
-
-                // Saving map tiles of shaft
-                {
-                    List<MapTile> mapTiles = jdbcService.findMapTilesByMap(map, shaft.id);
-                    ld.saveMapTiles(mapTiles);
-                }
-
-                // Saving documents of shaft
-                {
-                    List<Document> documents = jdbcService.findDocumentsByMap(map, shaft.id);
-                    ld.saveDocuments(documents);
-                }
-
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+        // TODO: Optimize this
+        try {
+            Map map;
+            // Saving shaft
+            {
+                map = ld.saveShaft(shaft);
+                progress += 10;
+                ld.removePointsByShaft(map.getId());
+                progress += 10;
             }
 
+            // Saving points of shaft
+            {
+                PointDto pointDto = jdbcService.findPointsByMap(map, shaft.id);
+                progress += 10;
+                List<Point> points = getPoints(pointDto);
+                ld.savePoints(points);
+                progress += 10;
+            }
+
+            // Saving map tiles of shaft
+            {
+                List<MapTile> mapTiles = jdbcService.findMapTilesByMap(map, shaft.id);
+                progress += 10;
+                ld.saveMapTiles(mapTiles);
+                progress += 10;
+            }
+
+            // Saving documents of shaft
+            {
+                List<Document> documents = jdbcService.findDocumentsByMap(map, shaft.id);
+                progress += 30;
+                ld.saveDocuments(documents);
+                progress += 10;
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
 
         downloading = false;
+        progress = 0;
     }
 
     private void clearAllDb() {
@@ -99,18 +109,30 @@ public class MapUpdateService {
         ld.forceClearAll();
     }
 
-    private void checkUpdate() {
-        List<Map> maps = LiteDirectory.getInstance().getShafts();
+    public boolean checkUpdate() {
+        LiteDirectory ld = LiteDirectory.getInstance();
+        List<Map> maps = ld.getShafts();
 
-        if(maps.size() == 0) {
-            new Thread(this::downloadAllMaps).start();
+        if(maps.size() == 0)
+            return true;
+
+        String name = UserService.getInstance().getCode();
+
+        if(Objects.isNull(name))
+            return false;
+
+        try {
+            JdbcService jdbcService = new JdbcService();
+
+            MapDto shaft = jdbcService.findShaftByName(name);
+
+            return ld.needUpdate(shaft);
+        } catch (Exception e) {
+            return false;
         }
     }
 
-    public MapUpdateService(MapListService mapListService) {
-        this.mapListService = mapListService;
-
-        new Thread(this::checkUpdate).start();
+    public MapUpdateService() {
     }
 
     public void forceClear() {
@@ -118,12 +140,15 @@ public class MapUpdateService {
     }
 
     public void forceDownload() {
-        new Thread(this::downloadAllMaps).start();
+        downloading = true;
+        new Thread(this::downloadMap).start();
     }
 
     public boolean isDownloading() {
         return downloading;
     }
+
+    public int getProgress() { return progress; }
 
     public void updateMaps(List<String> maps) {
         mapsToUpdate = maps;

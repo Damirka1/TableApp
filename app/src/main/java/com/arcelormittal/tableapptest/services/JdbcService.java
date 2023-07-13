@@ -12,8 +12,11 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
+
+import kotlin.NotImplementedError;
 
 public class JdbcService {
 
@@ -21,7 +24,8 @@ public class JdbcService {
 
     public JdbcService() {
         try {
-            connection = DriverManager.getConnection("jdbc:postgresql://home.damirka.space:5431/pla", "postgres", "SUPERHELLOWORDL123@");
+//            connection = DriverManager.getConnection("jdbc:postgresql://home.damirka.space:5431/pla", "postgres", "SUPERHELLOWORDL123@");
+            connection = DriverManager.getConnection("jdbc:postgresql://130.61.79.90:5432/pla", "root", "EasingObliviousGarbageEntwineRemissionReactorPending");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             throw new RuntimeException(e);
@@ -45,7 +49,7 @@ public class JdbcService {
                 MapDto map = new MapDto();
                 map.id = rs.getLong(1);
                 map.name = rs.getString(2);
-                map.created = rs.getDate(3);
+                map.created = rs.getTimestamp(3).toInstant();
 
                 maps.add(map);
             }
@@ -54,6 +58,31 @@ public class JdbcService {
         }
 
         return maps;
+    }
+
+    public MapDto findShaftByName(String name) {
+        Statement st = null;
+        try {
+            st = connection.createStatement();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        String sql = "select max(id), name, max(created) as created from shaft " + "where name = " + '\'' + name + '\''  + " group by name";
+
+        MapDto map = new MapDto();
+
+        try {
+            ResultSet rs = st.executeQuery(sql);
+            if(rs.next()) {
+                map.id = rs.getLong(1);
+                map.name = rs.getString(2);
+                map.created = rs.getTimestamp(3).toInstant();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return map;
     }
 
     public PointDto findPointsByMap(Map map, long shaftId) {
@@ -80,6 +109,10 @@ public class JdbcService {
         return pointDto;
     }
 
+    private int countDocumentsByMap(long shaftId) {
+        throw new NotImplementedError();
+    }
+
     public List<Document> findDocumentsByMap(Map map, long shaftId) {
         Statement st = null;
         try {
@@ -87,7 +120,12 @@ public class JdbcService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        String sql = "SELECT name, doc_file FROM doc WHERE shaft_id = " + shaftId;
+
+        // TODO: make downloading with paging and threads
+
+//        int count = countDocumentsByMap(shaftId);
+
+        String sql = "SELECT name, doc_file FROM doc WHERE shaft_id = " + shaftId; // + "OFFSET 0 FETCH NEXT 5 ROWS ONLY";
 
         List<Document> documentDtos = new LinkedList<>();
 
