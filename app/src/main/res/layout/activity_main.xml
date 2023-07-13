@@ -44,7 +44,7 @@
             android:id="@+id/MapsButton"
             android:layout_width="187dp"
             android:layout_height="54dp"
-            android:text="Карты"
+            android:text="Открыть карту"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.504"

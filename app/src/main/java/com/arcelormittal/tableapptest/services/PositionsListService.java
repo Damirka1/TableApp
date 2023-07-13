@@ -50,7 +50,15 @@ public class PositionsListService {
     }
 
     public PositionsListService(long shaftId, android.content.Context context, ListView posList, ListView searchList, MapActivity mapActivity) {
-        new Thread(this::loadPoints).start();
+        Thread t = new Thread(this::loadPoints);
+        t.start();
+
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         this.context = context;
         this.mapActivity = mapActivity;
 

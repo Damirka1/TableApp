@@ -259,7 +259,5 @@ public class MapActivity extends AppCompatActivity {
         positionsListService.filterList("");
     }
 
-
-
 }
 

@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.arcelormittal.tableapptest.services.LiteDirectory;
 import com.arcelormittal.tableapptest.services.MapListService;
@@ -178,10 +179,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void openMaps(View view) {
         View v = vi.inflate(R.layout.maps_list, viewLayout, false);
-        ListView list = v.findViewById(R.id.MapList);
-        mapListService.setList(list, getApplicationContext(), this);
+//        ListView list = v.findViewById(R.id.MapList);
+//        mapListService.setList(list, getApplicationContext(), this);
 
-        setTabView(v);
+        new Thread(() -> {
+
+            if(!mapListService.openMap(this))
+                runOnUiThread(() -> Toast.makeText(this, "У вас не установлена карта", Toast.LENGTH_LONG).show());
+
+        }).start();
+
+//        setTabView(v);
     }
 
     private void openSettings(View view) {

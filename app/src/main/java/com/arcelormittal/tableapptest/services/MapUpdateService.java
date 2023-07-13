@@ -20,6 +20,8 @@ public class MapUpdateService {
     private MapListService mapListService;
     private List<String> mapsToUpdate = new LinkedList<>();
 
+    private JdbcService jdbcService;
+
     private boolean downloading = false;
     private int progress = 0;
 
@@ -52,8 +54,6 @@ public class MapUpdateService {
         if(Objects.isNull(name))
             return;
 
-        JdbcService jdbcService = new JdbcService();
-
         downloading = true;
         progress = 0;
 
@@ -72,29 +72,37 @@ public class MapUpdateService {
             }
 
             // Saving points of shaft
-            {
+            Thread t1 = new Thread(() -> {
                 PointDto pointDto = jdbcService.findPointsByMap(map, shaft.id);
                 progress += 10;
                 List<Point> points = getPoints(pointDto);
                 ld.savePoints(points);
                 progress += 10;
-            }
+            });
+
+            t1.start();
 
             // Saving map tiles of shaft
-            {
+            Thread t2 = new Thread(() -> {
                 List<MapTile> mapTiles = jdbcService.findMapTilesByMap(map, shaft.id);
                 progress += 10;
                 ld.saveMapTiles(mapTiles);
                 progress += 10;
-            }
+            });
+            t2.start();
 
             // Saving documents of shaft
-            {
+            Thread t3 = new Thread(() -> {
                 List<Document> documents = jdbcService.findDocumentsByMap(map, shaft.id);
                 progress += 30;
                 ld.saveDocuments(documents);
                 progress += 10;
-            }
+            });
+            t3.start();
+
+            t3.join();
+            t2.join();
+            t1.join();
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -133,6 +141,9 @@ public class MapUpdateService {
     }
 
     public MapUpdateService() {
+        new Thread(() -> {
+            jdbcService = new JdbcService();
+        }).start();
     }
 
     public void forceClear() {

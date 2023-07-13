@@ -32,6 +32,25 @@ public class MapListService {
         mapList = new LinkedList<>();
     }
 
+    public boolean openMap(MainActivity mainActivity) {
+        LiteDirectory ld = LiteDirectory.getInstance();
+        maps = ld.getShafts();
+
+        if(maps.size() == 0)
+            return false;
+
+        Map map = maps.get(0);
+
+        Intent myIntent = new Intent(mainActivity, MapActivity.class);
+
+        myIntent.putExtra("value", map.getName());
+
+        myIntent.putExtra("id", map.getId());
+
+        mainActivity.startActivity(myIntent);
+        return true;
+    }
+
     public void setList(ListView list, android.content.Context context, MainActivity mainActivity) {
 
         Thread t = new Thread(this::listShafts);
