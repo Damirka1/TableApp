@@ -135,7 +135,7 @@ public class MapActivity extends AppCompatActivity {
     private void setMarkers(MapView map) {
         MarkerLayout markerLayout = map.getMarkerLayout();
 
-        LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         for(Point point : positionsListService.getPoints()) {
             View v = vi.inflate(R.layout.marker, null);
@@ -202,7 +202,7 @@ public class MapActivity extends AppCompatActivity {
 
         MapViewConfiguration config = new MapViewConfiguration(
                 1, fullSize, fullSize, tileSize, tileStreamProvider
-        ).setMinScale(0.3f).setMaxScale(2f).setStartScale(0.5f).setPadding(tileSize * 2).setWorkerCount(8);
+        ).setMinScale(0.3f).setMaxScale(2f).setStartScale(0.5f).setPadding(tileSize * 2).setWorkerCount(4);
 
         map.configure(config);
 

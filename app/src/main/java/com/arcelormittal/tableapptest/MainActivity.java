@@ -124,8 +124,6 @@ public class MainActivity extends AppCompatActivity {
                     if(Objects.nonNull(codeInput.getText())) {
                         String code = codeInput.getText().toString();
 
-                        code = "Казахстанская";
-
                         UserService.getInstance().saveCode(code);
 
                         codeInputLayout.setVisibility(View.GONE);
@@ -197,11 +195,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Setting buttons
         Button roomResetBtn = v.findViewById(R.id.RoomReset);
+        Button codeResetBtn = v.findViewById(R.id.CodeReset);
         Button roomDownloadBtn = v.findViewById(R.id.RoomDownload);
 
         roomResetBtn.setOnClickListener(resetView -> mapUpdateService.forceClear());
+        roomResetBtn.setOnClickListener(resetView -> mapUpdateService.forceClear());
 
-        roomDownloadBtn.setOnClickListener(resetView -> mapUpdateService.forceDownload());
+        codeResetBtn.setOnClickListener(resetView -> {
+            UserService.getInstance().clearUser();
+//            mapUpdateService.forceClear();
+        });
 
         // Set info in settings
         if(!UserService.getInstance().isFirstStartUp()) {

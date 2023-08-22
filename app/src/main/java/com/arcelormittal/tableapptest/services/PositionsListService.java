@@ -50,6 +50,14 @@ public class PositionsListService {
     }
 
     public PositionsListService(long shaftId, android.content.Context context, ListView posList, ListView searchList, MapActivity mapActivity) {
+        this.shaftId = shaftId;
+
+        this.context = context;
+        this.mapActivity = mapActivity;
+
+        this.posList = posList;
+        this.searchList = searchList;
+
         Thread t = new Thread(this::loadPoints);
         t.start();
 
@@ -58,14 +66,6 @@ public class PositionsListService {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-        this.context = context;
-        this.mapActivity = mapActivity;
-
-        this.shaftId = shaftId;
-
-        this.posList = posList;
-        this.searchList = searchList;
 
         adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mapList);
         posList.setAdapter(adapter);

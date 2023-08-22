@@ -24,11 +24,12 @@ public class JdbcService {
 
     public JdbcService() {
         try {
-//            connection = DriverManager.getConnection("jdbc:postgresql://home.damirka.space:5431/pla", "postgres", "SUPERHELLOWORDL123@");
-            connection = DriverManager.getConnection("jdbc:postgresql://130.61.79.90:5432/pla", "root", "EasingObliviousGarbageEntwineRemissionReactorPending");
+            connection = DriverManager.getConnection("jdbc:postgresql://home.damirka.space:5431/pla", "postgres", "SUPERHELLOWORDL123@");
+//            connection = DriverManager.getConnection("jdbc:postgresql://192.168.1.30:5431/pla", "postgres", "SUPERHELLOWORDL123@");
+//            connection = DriverManager.getConnection("jdbc:postgresql://130.61.79.90:5432/pla", "root", "EasingObliviousGarbageEntwineRemissionReactorPending");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            //throw new RuntimeException(e);
         }
     }
 

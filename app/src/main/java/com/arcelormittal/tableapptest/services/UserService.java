@@ -52,6 +52,12 @@ public class UserService {
         new Thread(this::saveUser).start();
     }
 
+    public void clearUser() {
+//        user.setCode("");
+        user.setFirstStartup(true);
+        new Thread(this::saveUser).start();
+    }
+
     public String getCode() {
         return user.getCode();
     }
