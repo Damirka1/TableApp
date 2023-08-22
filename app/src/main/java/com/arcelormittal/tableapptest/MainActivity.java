@@ -104,9 +104,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openGeneral(View view) {
-        View v = vi.inflate(R.layout.general_view, viewLayout, false);
+        // Set up loading screen
+        View loading = vi.inflate(R.layout.loading_view, viewLayout, false);
+
+        setTabView(loading);
 
         new Thread(() -> {
+            while(mapUpdateService.needWait()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            View v = vi.inflate(R.layout.general_view, viewLayout, false);
+
             TextView textInfo = v.findViewById(R.id.TextInfo);
 
             TextInputEditText codeInput = v.findViewById(R.id.CodeTextInput);
@@ -142,37 +155,40 @@ public class MainActivity extends AppCompatActivity {
                 TextView updateText = v.findViewById(R.id.UpdateText);
                 Button updateButton = v.findViewById(R.id.DownloadUpdateButton);
 
-                if(mapUpdateService.checkUpdate())
-                {
-                    updateText.setText("Доступно обновление");
+                if(mapUpdateService.hasConnection()) {
 
-                    runOnUiThread(() -> {
+                    if(mapUpdateService.checkUpdate())
+                    {
+                        updateText.setText("Доступно обновление");
+
                         updateButton.setVisibility(View.VISIBLE);
                         updateText.setVisibility(View.VISIBLE);
-                    });
 
-                    updateButton.setOnClickListener((View v2) -> {
-                        updateButton.setVisibility(View.GONE);
-                        mapUpdateService.forceDownload();
-                        checkMapDownloading(v);
+                        updateButton.setOnClickListener((View v2) -> {
+                            updateButton.setVisibility(View.GONE);
+                            mapUpdateService.forceDownload();
+                            checkMapDownloading(v);
 
-                        updateText.setText("Обновлений нет");
-                    });
+                            updateText.setText("Обновлений нет");
+                        });
 
-                }
-                else
-                {
-                    runOnUiThread(() -> {
+                    }
+                    else
+                    {
                         updateText.setText("Обновлений нет");
                         updateText.setVisibility(View.VISIBLE);
                         checkMapDownloading(v);
-                    });
+                    }
+                } else {
+                    updateText.setText("Нет интернет соединения");
+                    updateText.setVisibility(View.VISIBLE);
                 }
+
             }
 
-        }).start();
+            runOnUiThread(() -> setTabView(v));
 
-        setTabView(v);
+        }).start();
     }
 
     private void openMaps(View view) {
