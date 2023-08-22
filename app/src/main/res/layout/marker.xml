@@ -1,33 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/MarkerLayout"
-    android:layout_width="20dp"
-    android:layout_height="20dp"
-    android:alpha="0.7"
-    android:translationX="-10dp"
-    android:translationY="-10dp"
-    android:visibility="visible">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:translationX="-17dp"
+    android:translationY="-17dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/CircleLayout"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:alpha="0.7"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:alpha="0.1"
         android:background="@drawable/circle_bg"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/MarkerTest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="40px"
-            android:visibility="gone" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

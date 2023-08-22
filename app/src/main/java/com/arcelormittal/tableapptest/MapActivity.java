@@ -31,6 +31,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 import ovh.plrapps.mapview.MapView;
@@ -132,21 +134,36 @@ public class MapActivity extends AppCompatActivity {
         searchLayout.setVisibility(View.VISIBLE);
     }
 
+    private List<View> markers = new LinkedList<>();
+
     private void setMarkers(MapView map) {
         MarkerLayout markerLayout = map.getMarkerLayout();
 
-        LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater vi = getLayoutInflater();
 
         for(Point point : positionsListService.getPoints()) {
             View v = vi.inflate(R.layout.marker, null);
 
-            ((TextView)v.findViewById(R.id.MarkerTest)).setText(point.getText());
+            v.setTag(point.getText());
+
+            float scale = 7;
+
+            v.setTranslationX(-point.getR() * (scale / 2));
+            v.setTranslationY(-point.getR() * (scale / 2));
+
+            var c = v.findViewById(R.id.CircleLayout);
+            var l = c.getLayoutParams();
+            l.width = (int) (point.getR() * scale);
+            l.height = (int) (point.getR() * scale);
+            c.requestLayout();
+
+            markers.add(v);
 
             markerLayout.addMarker(v, point.getX(), point.getY(),
                     0f, 0f, 0f, 0f, point.getText());
 
             v.setOnClickListener(view -> {
-                String position = ((TextView)v.findViewById(R.id.MarkerTest)).getText().toString();
+                String position = view.getTag().toString();
                 String positionWithoutLetters = position.replaceAll("([а-я])", "");
 
                 try {
@@ -164,6 +181,16 @@ public class MapActivity extends AppCompatActivity {
                 }
             });
         }
+
+        map.addReferentialListener(referentialData -> {
+            float scale = referentialData.getScale();
+
+            markers.parallelStream().forEach((view -> {
+                view.setScaleX(scale);
+                view.setScaleY(scale);
+            }));
+
+        });
     }
 
     @Override

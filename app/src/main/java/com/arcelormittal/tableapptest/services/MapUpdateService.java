@@ -117,6 +117,14 @@ public class MapUpdateService {
         ld.forceClearAll();
     }
 
+    public boolean needWait() {
+        return Objects.isNull(jdbcService);
+    }
+
+    public boolean hasConnection() {
+        return jdbcService.isConnected();
+    }
+
     public boolean checkUpdate() {
         LiteDirectory ld = LiteDirectory.getInstance();
         List<Map> maps = ld.getShafts();
@@ -130,8 +138,6 @@ public class MapUpdateService {
             return false;
 
         try {
-            JdbcService jdbcService = new JdbcService();
-
             MapDto shaft = jdbcService.findShaftByName(name);
 
             return ld.needUpdate(shaft);
@@ -141,9 +147,7 @@ public class MapUpdateService {
     }
 
     public MapUpdateService() {
-        new Thread(() -> {
-            jdbcService = new JdbcService();
-        }).start();
+        new Thread(() -> jdbcService = new JdbcService()).start();
     }
 
     public void forceClear() {
