@@ -14,6 +14,7 @@ import com.arcelormittal.tableapptest.room.entities.Document;
 import com.arcelormittal.tableapptest.room.entities.Point;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +39,7 @@ public class PositionsListService {
         LiteDirectory ld = LiteDirectory.getInstance();
         points = ld.getPointsByShaft(shaftId);
         mapList.addAll(ld.getDocumentsByShaftId(shaftId).stream().map(Document::getName).collect(Collectors.toList()));
+        Collections.sort(mapList);
     }
 
     public void openFile(String file) {

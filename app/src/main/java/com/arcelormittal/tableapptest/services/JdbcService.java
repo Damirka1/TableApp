@@ -26,9 +26,7 @@ public class JdbcService {
 
     public JdbcService() {
         try {
-            connection = DriverManager.getConnection("jdbc:postgresql://home.damirka.space:5431/pla", "postgres", "SUPERHELLOWORDL123@");
-//            connection = DriverManager.getConnection("jdbc:postgresql://192.168.1.30:5431/pla", "postgres", "SUPERHELLOWORDL123@");
-//            connection = DriverManager.getConnection("jdbc:postgresql://130.61.79.90:5432/pla", "root", "EasingObliviousGarbageEntwineRemissionReactorPending");
+            connection = DriverManager.getConnection("jdbc:postgresql://universalwill.ru:25568/pla", "uzer", "RGu8Yh6#op");
 
             isConnected = true;
         } catch (SQLException e) {

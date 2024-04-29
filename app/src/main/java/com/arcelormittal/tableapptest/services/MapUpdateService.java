@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +48,7 @@ public class MapUpdateService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Collections.sort(pointList, Comparator.comparing(Point::getText));
         return pointList;
     }
     private void downloadMap() {
@@ -129,7 +132,7 @@ public class MapUpdateService {
         LiteDirectory ld = LiteDirectory.getInstance();
         List<Map> maps = ld.getShafts();
 
-        if(maps.size() == 0)
+        if(maps.isEmpty())
             return true;
 
         String name = UserService.getInstance().getCode();
