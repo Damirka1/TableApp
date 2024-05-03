@@ -48,7 +48,7 @@ public class MapUpdateService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Collections.sort(pointList, Comparator.comparing(Point::getText));
+        pointList.sort(Comparator.comparing(Point::getText));
         return pointList;
     }
     private void downloadMap() {
